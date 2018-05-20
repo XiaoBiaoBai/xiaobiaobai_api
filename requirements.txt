@@ -1,0 +1,15 @@
+Django==2.0.5
+django-appconf==1.0.2
+django-autoslug==1.9.3
+django-compressor==2.2
+django-debug-toolbar==1.9.1
+django-haystack==2.8.1
+django-ipware==2.1.0
+django-pagedown==1.0.4
+django-uuslug==1.1.8
+pytz==2018.4
+PyMySQL==0.8.0
+requests==2.18.4
+WeRoBot==1.4.0
+coverage==4.5.1
+jieba==0.39
