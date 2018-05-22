@@ -6,7 +6,8 @@ from django.utils.timezone import now
 
 class SystemConfigMode(models.Model):
     private_key = models.CharField("私钥", max_length=1000, null=False)
-    leftoveraddress = models.CharField("转入地址", max_length=1000, null=False)
+    outaddress = models.CharField("转出地址", max_length=1000, null=False, default='')
+    leftoveraddress = models.CharField("剩余转入地址", max_length=1000, null=False)
     default_fee = models.IntegerField("默认费用", default=1)
     created_time = models.DateTimeField('创建时间', default=now)
     last_mod_time = models.DateTimeField('修改时间', default=now)
