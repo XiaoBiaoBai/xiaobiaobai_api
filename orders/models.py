@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.utils.timezone import now
 
@@ -5,6 +6,7 @@ from django.utils.timezone import now
 # Create your models here.
 
 class OrderModel(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     third_orderid = models.CharField("第三方订单编号", max_length=200, null=True)
     userid = models.ForeignKey('accounts.UserModel', verbose_name='用户', on_delete=models.CASCADE)
     tx_hex = models.CharField("tx_hex", max_length=2000, null=True)
@@ -18,7 +20,10 @@ class OrderModel(models.Model):
     last_mod_time = models.DateTimeField('修改时间', default=now)
 
     def __str__(self):
-        return self.third_orderid
+        return self.id
+
+    def __repr__(self):
+        return self.__str__()
 
     class Meta:
         ordering = ['-created_time']
