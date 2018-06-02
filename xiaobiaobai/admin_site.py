@@ -14,9 +14,11 @@
 """
 
 from django.contrib.admin import AdminSite
+from django.contrib.admin.models import LogEntry
 
 from systemconfig.admin import SystemConfigAdmin
 from systemconfig.models import SystemConfigMode
+from xiaobiaobai.logentryadmin import LogEntryAdmin
 
 
 class XiaoBiaoBaiAdminSite(AdminSite):
@@ -33,3 +35,5 @@ class XiaoBiaoBaiAdminSite(AdminSite):
 admin_site = XiaoBiaoBaiAdminSite(name='admin')
 
 admin_site.register(SystemConfigMode, SystemConfigAdmin)
+
+admin_site.register(LogEntry, LogEntryAdmin)

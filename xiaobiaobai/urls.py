@@ -16,6 +16,10 @@ Including another URLconf
 from xiaobiaobai.admin_site import admin_site
 from django.urls import path
 
+from werobot.contrib.django import make_view
+from xiaobiaobai.robot import robot
+
 urlpatterns = [
     path('admin/', admin_site.urls),
+    path(r'wxcallback', make_view(robot)),
 ]
