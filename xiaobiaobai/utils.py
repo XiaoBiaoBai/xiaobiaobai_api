@@ -24,6 +24,8 @@ logger = logging.getLogger('xiaobiaobai')
 
 def get_systemconfigs():
     o = SystemConfigMode.objects.first()
+    if not o:
+        raise ValueError("系统配置不能为空")
     return o
 
 
@@ -54,3 +56,15 @@ def get_transaction_info(txid):
     if response.status_code == 200:
         result = json.loads(response.text, encoding='utf-8')
         return result
+
+
+def get_baidu_accesstoken():
+    config = get_systemconfigs()
+    host = 'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id={clientid}&client_secret={secret}'.format(
+        clientid=config.baidu_appid, secret=config.baidu_appsecret)
+    response = requests.get(host)
+    return response.content
+
+
+def check_words_spam(content):
+    accesstoken = get_baidu_accesstoken()

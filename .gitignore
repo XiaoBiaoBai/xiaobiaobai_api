@@ -105,3 +105,4 @@ venv.bak/
 .idea/
 migrations/
 !migrations/__init__.py
+werobot_session

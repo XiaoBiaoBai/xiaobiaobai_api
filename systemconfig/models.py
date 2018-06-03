@@ -9,6 +9,8 @@ class SystemConfigMode(models.Model):
     outaddress = models.CharField("转出地址", max_length=1000, null=False, default='')
     leftoveraddress = models.CharField("剩余转入地址", max_length=1000, null=False)
     default_fee = models.IntegerField("默认费用", default=1)
+    baidu_appid = models.CharField("百度appid", max_length=1000, null=True)
+    baidu_appsecret = models.CharField("百度secret", max_length=1000, null=True)
     created_time = models.DateTimeField('创建时间', default=now)
     last_mod_time = models.DateTimeField('修改时间', default=now)
 
