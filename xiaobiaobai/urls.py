@@ -17,9 +17,12 @@ from xiaobiaobai.admin_site import admin_site
 from django.urls import path
 
 from werobot.contrib.django import make_view
-from xiaobiaobai.robot import robot
+from weixin.robot import robot
+
+from weixin import views
 
 urlpatterns = [
+    path('', views.get_wxuser_openid),
     path('admin/', admin_site.urls),
     path(r'wxcallback', make_view(robot)),
 ]

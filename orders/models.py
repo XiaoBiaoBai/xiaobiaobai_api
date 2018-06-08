@@ -2,12 +2,17 @@ import uuid
 from django.db import models
 from django.utils.timezone import now
 
-
 # Create your models here.
+THIRD_ORDER_CHANNEL = (
+    ('w', '微信'),
+)
+
 
 class OrderModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     third_orderid = models.CharField("第三方订单编号", max_length=200, null=True)
+    third_orderchannel = models.CharField('第三方订单渠道', max_length=1, choices=THIRD_ORDER_CHANNEL, default='w')
+
     usermodel = models.ForeignKey('accounts.UserModel', verbose_name='用户', related_name='postusermodel',
                                   on_delete=models.CASCADE, null=True)
     target_usermodel = models.ForeignKey('accounts.UserModel', verbose_name='目标用户', related_name='targetusermodel',
@@ -37,6 +42,10 @@ class OrderModel(models.Model):
         verbose_name = "订单"
         verbose_name_plural = verbose_name
         get_latest_by = 'created_time'
+
+        indexes = [
+            models.Index(fields=['city', 'third_orderid'])
+        ]
 
 
 class BlessingModel(models.Model):

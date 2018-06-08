@@ -68,3 +68,11 @@ def get_baidu_accesstoken():
 
 def check_words_spam(content):
     accesstoken = get_baidu_accesstoken()
+
+
+class ResponseCode():
+    SUCCESS = 200,
+    ERROR = 500
+    NOT_FOUND = 404
+    FORBIDDEN = 403
+    WX_ERROR = 501

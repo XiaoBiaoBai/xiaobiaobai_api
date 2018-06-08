@@ -29,7 +29,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    #'django.contrib.admin',
+    # 'django.contrib.admin',
     'django.contrib.admin.apps.SimpleAdminConfig',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'accounts',
     'orders',
     'apis',
-    'systemconfig'
+    'systemconfig',
+    'weixin'
 ]
 
 MIDDLEWARE = [
@@ -83,7 +84,7 @@ DATABASES = {
         'NAME': 'xiaobiaobai',
         'USER': 'root',
         'PASSWORD': 'root',
-        'HOST': 'db',
+        'HOST': '127.0.0.1',
         'PORT': 3306,
     }
 }
