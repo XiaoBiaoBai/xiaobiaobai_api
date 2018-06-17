@@ -38,14 +38,15 @@ class OrderManager():
     @staticmethod
     def create_order(order: PostLoveSerializer):
         ordermodel = OrderModel()
-        ordermodel.order_content = order.content
-        ordermodel.usermodel = UserModel.objects.get(pk=order.post_userid)
-        ordermodel.target_usermodel = UserModel.objects.get(pk=order.target_userid)
-        ordermodel.city = order.location
+        ordermodel.order_content = order.order_content
+        ordermodel.usermodel = UserModel.objects.get(pk=order.usermodel)
+        ordermodel.target_usermodel = UserModel.objects.get(pk=order.target_usermodel)
+        ordermodel.city = order.city
         ordermodel.fee = OrderManager.calculate_order_fee(order)
 
         ordermodel.save()
+        openid = ordermodel.usermodel.wxusermodel.openid
 
-        jsdata = WxManager.create_wx_jsapi(openid=order.post_user_openid, orderid=ordermodel.id, body="发布表白",
+        jsdata = WxManager.create_wx_jsapi(openid=openid, orderid=ordermodel.id, body="发布表白",
                                            fee=ordermodel.fee)
         return (ordermodel, jsdata)

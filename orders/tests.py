@@ -27,7 +27,17 @@ class OrderTest(TestCase):
         o = OrderModel()
         o.target_usermodel = t
         o.usermodel = u
+        o.candies_count = 12
+        o.city = '上海'
+        o.order_content = '测试'
+        o.wx_prepayid = "wx_prepayid"
         o.save()
+
+        from orders.viewmodels import PostLoveSerializer
+        s = PostLoveSerializer(o)
+
+        print(s.data)
+
         self.assertEqual(OrderModel.objects.count(), 1)
         self.assertEqual(OrderModel.objects.first().target_usermodel, t)
         self.assertEqual(OrderModel.objects.first().usermodel, u)
