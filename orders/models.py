@@ -6,13 +6,19 @@ from django.utils.timezone import now
 THIRD_ORDER_CHANNEL = (
     ('w', '微信'),
 )
+ORDER_STATUS = (
+
+    ('c', '创建'),
+    ('p', '已支付'),
+)
 
 
 class OrderModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     third_orderid = models.CharField("第三方订单编号", max_length=200, null=True)
     third_orderchannel = models.CharField('第三方订单渠道', max_length=1, choices=THIRD_ORDER_CHANNEL, default='w')
-
+    order_status = models.CharField("订单状态", max_length=1, choices=ORDER_STATUS, null=False, default='c')
+    pay_time = models.DateTimeField("付款时间", null=True)
     usermodel = models.ForeignKey('accounts.UserModel', verbose_name='用户', related_name='postusermodel',
                                   on_delete=models.CASCADE, null=True)
     target_usermodel = models.ForeignKey('accounts.UserModel', verbose_name='目标用户', related_name='targetusermodel',
@@ -26,7 +32,7 @@ class OrderModel(models.Model):
 
     city = models.CharField('位置', max_length=100, null=True)
     candies_count = models.IntegerField('糖果数目', default=0, null=False)
-
+    wx_prepayid = models.CharField("微信prepayid", max_length=300, null=True)
     order_content = models.CharField("文字", max_length=280, null=True)
     created_time = models.DateTimeField('创建时间', default=now)
     last_mod_time = models.DateTimeField('修改时间', default=now)
@@ -46,6 +52,10 @@ class OrderModel(models.Model):
         indexes = [
             models.Index(fields=['city', 'third_orderid'])
         ]
+
+
+class WxOrderModel(models.Model):
+    pass
 
 
 class BlessingModel(models.Model):

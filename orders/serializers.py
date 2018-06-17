@@ -9,7 +9,7 @@
 @contact: liangliangyy@gmail.com
 @site: https://www.lylinux.net/
 @software: PyCharm
-@file: serializers.py.py
+@file: serializers.py
 @time: 2018/6/3 下午10:17
 """
 from rest_framework import serializers
@@ -18,7 +18,7 @@ from orders.models import OrderModel, BlessingModel
 
 class OrderSerializer(serializers.Serializer):
     def validate(self, attrs):
-        pass
+        return super(self, OrderSerializer).validate(attrs)
 
     def update(self, instance, validated_data):
         instance.third_orderid = validated_data.get('third_orderid', instance.third_orderid)

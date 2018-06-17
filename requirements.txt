@@ -19,9 +19,11 @@ django-ipware==2.1.0
 django-pagedown==1.0.4
 django-uuslug==1.1.8
 djangorestframework==3.8.2
+gunicorn==19.8.1
 idna==2.6
 jieba==0.39
 Markdown==2.6.11
+Pillow==5.1.0
 pycparser==2.18
 PyMySQL==0.8.0
 python-slugify==1.2.5

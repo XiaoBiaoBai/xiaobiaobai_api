@@ -15,14 +15,13 @@ Including another URLconf
 """
 from xiaobiaobai.admin_site import admin_site
 from django.urls import path
-
-from werobot.contrib.django import make_view
-from weixin.robot import robot
-
-from weixin import views
+from django.conf.urls import url, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
-    path('', views.get_wxuser_openid),
-    path('admin/', admin_site.urls),
-    path(r'wxcallback', make_view(robot)),
-]
+                  url(r'weixin/', include('weixin.urls', namespace='weixin')),
+                  url(r'order/', include('orders.urls', namespace='order')),
+                  url('accounts/', include('accounts.urls', namespace='accounts')),
+                  path('admin/', admin_site.urls),
+              ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
