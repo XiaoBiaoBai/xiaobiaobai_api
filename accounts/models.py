@@ -22,7 +22,10 @@ class UserModel(models.Model):
     last_mod_time = models.DateTimeField('修改时间', default=now)
 
     def __str__(self):
-        return self.username
+        return str(self.id)
+
+    def __repr__(self):
+        return self.__str__()
 
     class Meta:
         ordering = ['-created_time']

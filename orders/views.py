@@ -12,10 +12,11 @@ from rest_framework import mixins
 from rest_framework.decorators import api_view
 
 from accounts.models import UserModel, WxUserModel
-from orders.viewmodels import PostLoveSerializer, OrderSerializer
+from orders.viewmodels import PostLoveSerializer, OrderSerializer, BlessingSerializer
 from orders.manager import OrderManager
 from orders.models import OrderModel
 from accounts.views import check_is_uuid
+from xiaobiaobai.utils import logger
 
 
 # @csrf_exempt
@@ -49,6 +50,16 @@ class OrderList(APIView):
         serializer = OrderSerializer(datas, many=True)
         return Response(serializer.data)
 
+    @csrf_exempt
+    def post(self, request, format=None):
+        serializer = PostLoveSerializer(data=request.data)
+        if serializer.is_valid():
+            ordermodel, jsdata = OrderManager.create_order(serializer)
+            if ordermodel and jsdata:
+                return JsonResponse(jsdata)
+            else:
+                return JsonResponse({"msg": "创建订单失败"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class OrderDetail(APIView):
     def get_object(self, pk):
@@ -61,20 +72,17 @@ class OrderDetail(APIView):
         serializer = OrderSerializer(order)
         return Response(serializer.data)
 
-    @csrf_exempt
-    def post(self, request, format=None):
-        serializer = PostLoveSerializer(data=request.data)
-        if serializer.is_valid():
-            ordermodel, jsdata = OrderManager.create_order(serializer)
-            if ordermodel and jsdata:
-                return JsonResponse(jsdata)
-            else:
-                return JsonResponse({"msg": "创建订单失败"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-#
-# def order_list(request):
-#     size = request.GET.get('size', default=20)
-#     index = request.GET.get('index', default=1)
-#     paginator = Paginator(OrderModel.objects.all(), size)
-#     datas = paginator.get_page(index)
+
+
+class BlessingDetail(APIView):
+    def post(self, request, format=None):
+        logger.info(request.data)
+        serializer = BlessingSerializer(data=request.data)
+        if serializer.is_valid():
+            OrderManager.create_blessing_order(serializer)
+            return Response({
+                'code': 200,
+                'msg': 'ok'
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

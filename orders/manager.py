@@ -13,9 +13,9 @@
 @time: 2018/6/9 下午9:24
 """
 
-from orders.viewmodels import PostLoveSerializer
+from orders.viewmodels import PostLoveSerializer, BlessingSerializer
 from weixin.manager import WxManager
-from orders.models import OrderModel
+from orders.models import OrderModel, BlessingModel
 from accounts.models import UserModel
 from xiaobiaobai.utils import send_bitcash_message, logger
 
@@ -37,10 +37,11 @@ class OrderManager():
 
     @staticmethod
     def create_order(order: PostLoveSerializer):
+        data = order.data
         ordermodel = OrderModel()
         ordermodel.order_content = order.order_content
-        ordermodel.usermodel = UserModel.objects.get(pk=order.usermodel)
-        ordermodel.target_usermodel = UserModel.objects.get(pk=order.target_usermodel)
+        ordermodel.usermodel = UserModel.objects.get(pk=data['usermodel'])
+        ordermodel.target_usermodel = UserModel.objects.get(pk=data['target_usermodel'])
         ordermodel.city = order.city
         ordermodel.fee = OrderManager.calculate_order_fee(order)
 
@@ -50,3 +51,14 @@ class OrderManager():
         jsdata = WxManager.create_wx_jsapi(openid=openid, orderid=ordermodel.id, body="发布表白",
                                            fee=ordermodel.fee)
         return (ordermodel, jsdata)
+
+    @staticmethod
+    def create_blessing_order(order: BlessingSerializer):
+        ordermodel = order.data['ordermodel']
+        usermodel = order.data['usermodel']
+        o = OrderModel.objects.get(pk=ordermodel)
+        u = UserModel.objects.get(pk=usermodel)
+        b = BlessingModel()
+        b.usermodel = u
+        b.ordermodel = o
+        b.save()

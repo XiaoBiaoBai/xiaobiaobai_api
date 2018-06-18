@@ -14,8 +14,9 @@
 """
 from rest_framework import serializers
 from accounts.models import UserModel, WxUserModel
-from orders.models import OrderModel
-from xiaobiaobai.utils import get_systemconfigs
+from orders.models import OrderModel, BlessingModel
+from xiaobiaobai.utils import get_systemconfigs, logger
+
 from django.core.exceptions import ObjectDoesNotExist
 
 from accounts.viewmodels import UserModelSerializer
@@ -48,11 +49,31 @@ from accounts.viewmodels import UserModelSerializer
 #         return super(PostLoveSerializer, self).validate(attrs)
 
 
+class BlessingSerializer(serializers.Serializer):
+    usermodel = serializers.PrimaryKeyRelatedField(queryset=UserModel.objects.all(),
+                                                   pk_field=serializers.UUIDField())
+    ordermodel = serializers.PrimaryKeyRelatedField(queryset=OrderModel.objects.all(),
+                                                    pk_field=serializers.UUIDField())
+
+    # def validate(self, attrs):
+    #     logger.info(attrs)
+    #     usermodel = attrs['usermodel']
+    #     ordermodel = attrs['ordermodel']
+    #     try:
+    #         UserModel.objects.get(pk=usermodel.id)
+    #     except ObjectDoesNotExist:
+    #         raise serializers.ValidationError("用户不存在")
+    #     try:
+    #         OrderModel.objects.get(pk=ordermodel)
+    #     except ObjectDoesNotExist:
+    #         raise serializers.ValidationError("订单信息不存在")
+
+
 class PostLoveSerializer(serializers.Serializer):
     usermodel = serializers.PrimaryKeyRelatedField(queryset=UserModel.objects.all(),
-                                                   pk_field=serializers.UUIDField(format='hex'))
+                                                   pk_field=serializers.UUIDField())
     target_usermodel = serializers.PrimaryKeyRelatedField(queryset=UserModel.objects.all(),
-                                                          pk_field=serializers.UUIDField(format='hex'))
+                                                          pk_field=serializers.UUIDField())
     candies_count = serializers.IntegerField(required=True, min_value=0)
     order_content = serializers.CharField(required=True, max_length=200)
     city = serializers.CharField(required=True, max_length=100)
@@ -72,6 +93,7 @@ class PostLoveSerializer(serializers.Serializer):
 
 
 class OrderSerializer(serializers.Serializer):
+    id = serializers.UUIDField(format='hex')
     usermodel = UserModelSerializer(read_only=True)
     target_usermodel = UserModelSerializer(read_only=True)
 
@@ -79,3 +101,4 @@ class OrderSerializer(serializers.Serializer):
     order_content = serializers.CharField(required=True, max_length=200)
     city = serializers.CharField(required=True, max_length=100)
     wx_prepayid = serializers.CharField(required=True, max_length=100)
+    blessings = BlessingSerializer(read_only=True, many=True, source='blessingmodel_set')

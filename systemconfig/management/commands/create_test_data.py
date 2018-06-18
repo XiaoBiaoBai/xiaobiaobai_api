@@ -13,13 +13,21 @@
 @time: 2018/6/18 下午12:12
 """
 
+import random
+
 from django.core.management.base import BaseCommand, CommandError
 from accounts.models import UserModel, WxUserModel
-from orders.models import OrderModel
+from orders.models import OrderModel, BlessingModel
 
 
 class Command(BaseCommand):
     help = '创建测试数据'
+
+    @property
+    def random_number(self):
+        d = random.randint(0, 10000)
+        random.seed(d)
+        return str(random.randint(0, 1000))
 
     def handle(self, *args, **options):
         wxuser = WxUserModel()
@@ -30,7 +38,7 @@ class Command(BaseCommand):
 
         u = UserModel()
         u.sex = 'm'
-        u.username = '啦啦啦123'
+        u.username = '啦啦啦' + self.random_number
         u.headimage = 'wcf.jpg'
         u.wxusermodel = wxuser
 
@@ -38,7 +46,7 @@ class Command(BaseCommand):
 
         t = UserModel()
         t.sex = 'w'
-        t.username = '发发发'
+        t.username = '发发发' + self.random_number
         t.headimage = 'wcwf.jpg'
         t.save()
 
@@ -46,9 +54,17 @@ class Command(BaseCommand):
 
         o.usermodel = u
         o.target_usermodel = t
-        o.order_content = '测试123'
+        o.order_content = '测试' + self.random_number
         o.candies_count = 1
         o.city = '上海'
+
+        o.save()
+        b = BlessingModel()
+        b.usermodel = u
+        b.ordermodel = o
+        b.save()
+
+        o.blessingmodel_set.add(b)
         o.save()
 
         self.stdout.write('成功创建测试数据')
