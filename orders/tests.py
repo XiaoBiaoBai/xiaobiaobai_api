@@ -33,10 +33,14 @@ class OrderTest(TestCase):
         o.wx_prepayid = "wx_prepayid"
         o.save()
 
-        from orders.viewmodels import PostLoveSerializer
+        from orders.viewmodels import PostLoveSerializer, OrderSerializer
         s = PostLoveSerializer(o)
 
         print(s.data)
+
+        orders = OrderModel.objects.all()
+        ss = OrderSerializer(orders, many=True)
+        print(ss.data)
 
         self.assertEqual(OrderModel.objects.count(), 1)
         self.assertEqual(OrderModel.objects.first().target_usermodel, t)

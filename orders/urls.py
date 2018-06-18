@@ -14,10 +14,11 @@
 """
 
 from django.urls import path
-from orders import views
+from orders.views import OrderList, OrderDetail
 
 app_name = "orders"
 
 urlpatterns = [
-    path('submit', views.submit_lovecontent, name="submit_lovecontent"),
+    path(r'order', OrderList.as_view(), name='orderlist'),
+    path(r'order/<str:pk>', OrderList.as_view(), name='orderdetail')
 ]

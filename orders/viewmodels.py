@@ -16,6 +16,9 @@ from rest_framework import serializers
 from accounts.models import UserModel, WxUserModel
 from orders.models import OrderModel
 from xiaobiaobai.utils import get_systemconfigs
+from django.core.exceptions import ObjectDoesNotExist
+
+from accounts.viewmodels import UserModelSerializer
 
 
 # class PostLoveSerializer(serializers.Serializer):
@@ -50,7 +53,29 @@ class PostLoveSerializer(serializers.Serializer):
                                                    pk_field=serializers.UUIDField(format='hex'))
     target_usermodel = serializers.PrimaryKeyRelatedField(queryset=UserModel.objects.all(),
                                                           pk_field=serializers.UUIDField(format='hex'))
-    candies_count = serializers.IntegerField(required=True)
+    candies_count = serializers.IntegerField(required=True, min_value=0)
+    order_content = serializers.CharField(required=True, max_length=200)
+    city = serializers.CharField(required=True, max_length=100)
+    wx_prepayid = serializers.CharField(required=True, max_length=100)
+
+    def validate(self, attrs):
+        usermodel = attrs['usermodel']
+        target_usermodel = attrs['target_usermodel']
+        try:
+            UserModel.objects.get(pk=usermodel)
+        except ObjectDoesNotExist:
+            raise serializers.ValidationError("用户不存在")
+        try:
+            UserModel.objects.get(pk=target_usermodel)
+        except ObjectDoesNotExist:
+            raise serializers.ValidationError("目标用户不存在")
+
+
+class OrderSerializer(serializers.Serializer):
+    usermodel = UserModelSerializer(read_only=True)
+    target_usermodel = UserModelSerializer(read_only=True)
+
+    candies_count = serializers.IntegerField(required=True, min_value=0)
     order_content = serializers.CharField(required=True, max_length=200)
     city = serializers.CharField(required=True, max_length=100)
     wx_prepayid = serializers.CharField(required=True, max_length=100)
