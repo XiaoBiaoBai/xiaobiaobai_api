@@ -16,6 +16,11 @@
 from werobot import WeRoBot
 from werobot.session.filestorage import FileStorage
 from weixin.weixinapi.wxutils import get_wx_config
+import os
+from django.conf import settings
+
+if os.path.exists(os.path.join(settings.BASE_DIR, 'werobot_session')):
+    os.remove(os.path.join(settings.BASE_DIR, 'werobot_session'))
 
 wxconfig = get_wx_config()
 

@@ -23,6 +23,7 @@ app_name = "weixin"
 
 urlpatterns = [
     path(r'wxlogin', views.wxuser_login, name="wxlogin"),
-    path(r'paycallback', views.wx_pay_callback, name="wx_pay_callback"),
+    path(r'paycallback/', views.wx_pay_callback, name="wx_pay_callback"),
     path(r'wxcallback', make_view(robot)),
+    path(r'wx_sign', views.wx_sign, name="wx_sign"),
 ]

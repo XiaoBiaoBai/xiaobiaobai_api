@@ -16,6 +16,8 @@ import logging
 from bitcash import Key
 import requests
 import json
+import uuid
+import qrcode
 
 from systemconfig.models import SystemConfigMode
 
@@ -68,6 +70,19 @@ def get_baidu_accesstoken():
 
 def check_words_spam(content):
     accesstoken = get_baidu_accesstoken()
+
+
+def convert_to_uuid(s: str):
+    try:
+        u = uuid.UUID(s)
+        return u
+    except Exception as e:
+        return None
+
+
+def create_qr_code(body: str):
+    image = qrcode.make(body)
+    return image
 
 
 class ResponseCode():

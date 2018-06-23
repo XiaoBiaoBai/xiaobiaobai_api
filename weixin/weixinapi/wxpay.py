@@ -208,3 +208,13 @@ class WeixinPay(object):
             raise WeixinPayError("对账单接口中，缺少必填参数bill_date")
 
         return self._fetch(url, data)
+
+    def create_wxconfig_sign(self, url: str):
+        data = {'url': url}
+        data['appId'] = self.wxconfig.app_id
+        data['timestamp'] = str(int(time.time()))
+        data['nonceStr'] = self.nonce_str
+        sign = self.sign(data)
+        data['signature'] = sign
+        data['jsApiList'] = ['onMenuShareTimeline', 'onMenuShareAppMessage', 'getLocation', 'openLocation']
+        return data

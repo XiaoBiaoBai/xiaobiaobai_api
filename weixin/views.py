@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.utils.timezone import now
+from django.views.decorators.csrf import csrf_protect
 
 import requests
 import json
@@ -42,6 +43,7 @@ def wxuser_login(request):
                                 status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     else:
         uri = wxlogin.authorize()
+        logger.info(uri)
         return HttpResponseRedirect(uri)
 
 
@@ -61,3 +63,12 @@ def wx_pay_callback(request):
         else:
             resultxml = pay_client.to_xml(dict(return_code="Failed", return_msg="签名错误"));
             return Response(resultxml, status=status.HTTP_403_FORBIDDEN)
+
+
+def wx_sign(request):
+    if request.method == 'GET':
+        url = request.GET.get('url')
+        data = WxManager.create_wxconfig_sign(url)
+        return JsonResponse(data)
+    else:
+        return Response('非法调用', status=status.HTTP_400_BAD_REQUEST)

@@ -26,6 +26,7 @@ from accounts.models import WxUserModel
 from orders.models import OrderModel
 import uuid
 from django.utils.timezone import now
+from django.core.exceptions import ObjectDoesNotExist
 
 wxconfig = get_wx_config()
 
@@ -41,19 +42,27 @@ class WxManager():
         :return:(openid,usermodel.id,targetusermodel.id)
         '''
         openid = token_response['openid']
-        wxuser = WxUserModel.objects.get_or_create(openid=openid)[0]
+        try:
+            wxuser = WxUserModel.objects.get(openid=openid)
+        except ObjectDoesNotExist:
+            wxuser = WxUserModel()
+            wxuser.openid = openid
+
         wxuser.access_token = token_response['access_token']
         wxuser.expires_in = token_response['expires_in']
         wxuser.refresh_token = token_response['refresh_token']
         wxuser.last_login_time = now()
         wxuser.save()
-
-        usermodel = UserModel.objects.get_or_create(WxUserModel.openid == openid)[0]
+        try:
+            usermodel = UserModel.objects.get(wxusermodel__openid=openid)
+        except ObjectDoesNotExist:
+            usermodel = UserModel()
 
         targetusermodel = UserModel()
         targetusermodel.save()
-        usermodel.targetusermodel = targetusermodel
-        usermodel.save()
+        if not usermodel.wxusermodel:
+            usermodel.wxusermodel = wxuser
+            usermodel.save()
 
         return (openid, usermodel.id, targetusermodel.id)
 
@@ -82,6 +91,12 @@ class WxManager():
             order.order_status = 'p'
             order.pay_time = now()
             order.save()
+            from orders.manager import OrderManager
+            OrderManager.post_love_words(order.order_content)
             return True
         except OrderModel.DoesNotExist:
             raise
+
+    @staticmethod
+    def create_wxconfig_sign(url):
+        return pay_client.create_wxconfig_sign(url)

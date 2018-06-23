@@ -15,7 +15,7 @@
 from rest_framework import serializers
 from accounts.models import UserModel, WxUserModel
 from orders.models import OrderModel, BlessingModel
-from xiaobiaobai.utils import get_systemconfigs, logger
+from xiaobiaobai.utils import get_systemconfigs, logger, convert_to_uuid
 
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -71,25 +71,29 @@ class BlessingSerializer(serializers.Serializer):
 
 class PostLoveSerializer(serializers.Serializer):
     usermodel = serializers.PrimaryKeyRelatedField(queryset=UserModel.objects.all(),
-                                                   pk_field=serializers.UUIDField())
+                                                   pk_field=serializers.UUIDField()
+                                                   )
     target_usermodel = serializers.PrimaryKeyRelatedField(queryset=UserModel.objects.all(),
                                                           pk_field=serializers.UUIDField())
     candies_count = serializers.IntegerField(required=True, min_value=0)
     order_content = serializers.CharField(required=True, max_length=200)
     city = serializers.CharField(required=True, max_length=100)
-    wx_prepayid = serializers.CharField(required=True, max_length=100)
 
-    def validate(self, attrs):
-        usermodel = attrs['usermodel']
-        target_usermodel = attrs['target_usermodel']
-        try:
-            UserModel.objects.get(pk=usermodel)
-        except ObjectDoesNotExist:
-            raise serializers.ValidationError("用户不存在")
-        try:
-            UserModel.objects.get(pk=target_usermodel)
-        except ObjectDoesNotExist:
-            raise serializers.ValidationError("目标用户不存在")
+    # wx_prepayid = serializers.CharField(required=True, max_length=100)
+
+    # def validate(self, attrs):
+    #     usermodel = convert_to_uuid(attrs['usermodel'])
+    #     target_usermodel = convert_to_uuid(attrs['target_usermodel'])
+    #     if not usermodel or not target_usermodel:
+    #         raise serializers.ValidationError("格式错误，不是有效的uuid")
+    #     try:
+    #         UserModel.objects.get(pk=usermodel)
+    #     except ObjectDoesNotExist:
+    #         raise serializers.ValidationError("用户不存在")
+    #     try:
+    #         UserModel.objects.get(pk=target_usermodel)
+    #     except ObjectDoesNotExist:
+    #         raise serializers.ValidationError("目标用户不存在")
 
 
 class OrderSerializer(serializers.Serializer):
