@@ -24,7 +24,8 @@ if os.path.exists(os.path.join(settings.BASE_DIR, 'werobot_session')):
 
 wxconfig = get_wx_config()
 
-robot = WeRoBot(token=wxconfig.token, enable_session=True)
+robot = WeRoBot(token='' if wxconfig is None else wxconfig.token, enable_session=True)
 robot.config['SESSION_STORAGE'] = FileStorage(filename='werobot_session')
-robot.config['APP_ID'] = wxconfig.app_id
-robot.config['APP_SECRET'] = wxconfig.app_secret
+
+robot.config['APP_ID'] = '' if wxconfig is None else wxconfig.app_id
+robot.config['APP_SECRET'] = '' if wxconfig is None else wxconfig.app_secret

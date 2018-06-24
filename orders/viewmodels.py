@@ -22,87 +22,45 @@ from django.core.exceptions import ObjectDoesNotExist
 from accounts.viewmodels import UserModelSerializer
 
 
-# class PostLoveSerializer(serializers.Serializer):
-#     content = serializers.CharField(required=True, max_length=200)
-#     post_userid = serializers.UUIDField(required=True)
-#     target_userid = serializers.UUIDField(required=True)
-#     location = serializers.CharField(required=False)
-#     candy_count = serializers.IntegerField(required=True)
-#     post_user_openid = serializers.CharField(required=True)
-#
-#     def validate(self, attrs):
-#         post_userid = attrs['post_userid']
-#         target_userid = attrs['target_userid']
-#         post_user_openid = attrs['post_user_openid']
-#         try:
-#             m = UserModel.objects.get(id == post_userid)
-#             if m.wxusermodel.openid != post_user_openid:
-#                 raise serializers.ValidationError("post_user_openid非法")
-#         except UserModel.DoesNotExist:
-#             raise serializers.ValidationError("post_userid不存在")
-#
-#         try:
-#             UserModel.objects.get(id == target_userid)
-#         except UserModel.DoesNotExist:
-#             raise serializers.ValidationError("post_userid不存在")
-#
-#         return super(PostLoveSerializer, self).validate(attrs)
-
-
 class BlessingSerializer(serializers.Serializer):
     usermodel = serializers.PrimaryKeyRelatedField(queryset=UserModel.objects.all(),
                                                    pk_field=serializers.UUIDField())
     ordermodel = serializers.PrimaryKeyRelatedField(queryset=OrderModel.objects.all(),
                                                     pk_field=serializers.UUIDField())
 
-    # def validate(self, attrs):
-    #     logger.info(attrs)
-    #     usermodel = attrs['usermodel']
-    #     ordermodel = attrs['ordermodel']
-    #     try:
-    #         UserModel.objects.get(pk=usermodel.id)
-    #     except ObjectDoesNotExist:
-    #         raise serializers.ValidationError("用户不存在")
-    #     try:
-    #         OrderModel.objects.get(pk=ordermodel)
-    #     except ObjectDoesNotExist:
-    #         raise serializers.ValidationError("订单信息不存在")
+    def validate(self, attrs):
+        usermodel = attrs['usermodel']
+        ordermodel = attrs['ordermodel']
+        if ordermodel.blessingmodel_set.filter(usermodel=usermodel.id):
+            raise serializers.ValidationError("不能重复点赞")
+
+        return super(BlessingSerializer, self).validate(attrs)
 
 
 class PostLoveSerializer(serializers.Serializer):
     usermodel = serializers.PrimaryKeyRelatedField(queryset=UserModel.objects.all(),
                                                    pk_field=serializers.UUIDField()
                                                    )
-    target_usermodel = serializers.PrimaryKeyRelatedField(queryset=UserModel.objects.all(),
-                                                          pk_field=serializers.UUIDField())
+    username = serializers.CharField(required=True)
+    target_username = serializers.CharField(required=True)
     candies_count = serializers.IntegerField(required=True, min_value=0)
     order_content = serializers.CharField(required=True, max_length=200)
     city = serializers.CharField(required=True, max_length=100)
-
-    # wx_prepayid = serializers.CharField(required=True, max_length=100)
-
-    # def validate(self, attrs):
-    #     usermodel = convert_to_uuid(attrs['usermodel'])
-    #     target_usermodel = convert_to_uuid(attrs['target_usermodel'])
-    #     if not usermodel or not target_usermodel:
-    #         raise serializers.ValidationError("格式错误，不是有效的uuid")
-    #     try:
-    #         UserModel.objects.get(pk=usermodel)
-    #     except ObjectDoesNotExist:
-    #         raise serializers.ValidationError("用户不存在")
-    #     try:
-    #         UserModel.objects.get(pk=target_usermodel)
-    #     except ObjectDoesNotExist:
-    #         raise serializers.ValidationError("目标用户不存在")
 
 
 class OrderSerializer(serializers.Serializer):
     id = serializers.UUIDField(format='hex')
     usermodel = UserModelSerializer(read_only=True)
-    target_usermodel = UserModelSerializer(read_only=True)
+
+    username = serializers.CharField()
+    target_username = serializers.CharField(required=True)
 
     candies_count = serializers.IntegerField(required=True, min_value=0)
     order_content = serializers.CharField(required=True, max_length=200)
     city = serializers.CharField(required=True, max_length=100)
     wx_prepayid = serializers.CharField(required=True, max_length=100)
     blessings = BlessingSerializer(read_only=True, many=True, source='blessingmodel_set')
+    confirmations = serializers.IntegerField(required=False)
+    block_height = serializers.IntegerField(required=False)
+    txid = serializers.CharField(required=False)
+    block_chain_url = serializers.CharField(required=False)

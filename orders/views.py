@@ -19,33 +19,19 @@ from accounts.views import check_is_uuid
 from xiaobiaobai.utils import logger
 
 
-# @csrf_exempt
-# @api_view(['POST'])
-# def submit_lovecontent(request):
-#     """
-#     发布誓言
-#     :param request:
-#     :return:
-#     """
-#     if request.method == 'POST':
-#         serializer = PostLoveSerializer(data=request.data)
-#         if serializer.is_valid():
-#             ordermodel, jsdata = OrderManager.create_order(serializer)
-#             if ordermodel and jsdata:
-#                 return JsonResponse(jsdata)
-#             else:
-#                 return JsonResponse({"msg": "创建订单失败"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-#         else:
-#             return JsonResponse({"msg": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-#     else:
-#         return JsonResponse({"msg": "only for post"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-
 class OrderList(APIView):
     def get(self, request, format=None):
         size = request.GET.get('size', default=20)
         index = request.GET.get('index', default=1)
-        paginator = Paginator(OrderModel.objects.all(), size)
+        ordertype = request.GET.get('ordertype', default=1)
+
+        if ordertype == 1:
+            queryset = OrderModel.objects.order_by('created_time').all()
+        else:
+            from django.db.models import Count
+            queryset = OrderModel.objects.annotate(blesscounts=Count('blessingmodel')).order_by('-blesscounts').all()
+
+        paginator = Paginator(queryset, size)
         datas = paginator.get_page(index)
         serializer = OrderSerializer(datas, many=True)
         return Response(serializer.data)
@@ -59,7 +45,11 @@ class OrderList(APIView):
                 return JsonResponse(jsdata)
             else:
                 return JsonResponse({"msg": "创建订单失败"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            'code': 400,
+            'msg': ','.join(serializer.errors) + '请求参数不正确'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
 
 class OrderDetail(APIView):
     def get_object(self, pk):
@@ -73,11 +63,8 @@ class OrderDetail(APIView):
         return Response(serializer.data)
 
 
-
-
 class BlessingDetail(APIView):
     def post(self, request, format=None):
-        logger.info(request.data)
         serializer = BlessingSerializer(data=request.data)
         if serializer.is_valid():
             OrderManager.create_blessing_order(serializer)
@@ -85,4 +72,8 @@ class BlessingDetail(APIView):
                 'code': 200,
                 'msg': 'ok'
             }, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        logger.info(serializer.errors)
+        return Response({
+            'code': 400,
+            'msg': ','.join(serializer.errors) + '请求参数不正确'
+        }, status=status.HTTP_400_BAD_REQUEST)

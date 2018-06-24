@@ -138,4 +138,16 @@ class WeiXinConfig(object):
 
 
 def get_wx_config():
-    return None
+    try:
+        from xiaobiaobai.utils import get_systemconfigs
+        sysconfig = get_systemconfigs()
+        config = WeiXinConfig(app_id=sysconfig.weixin_appid, app_secret=sysconfig.weixin_appsecret,
+                              scope=sysconfig.wx_scope, redirect_uri=sysconfig.wx_redirect_uri,
+                              mch_id=sysconfig.mch_id, mch_key=sysconfig.mch_key,
+                              notify_url=sysconfig.pay_notify_url, token=sysconfig.wx_token,
+                              remote_addr=sysconfig.wx_remote_addr)
+        return config
+    except Exception as e:
+        from xiaobiaobai.utils import logger
+        logger.error(e)
+        return None

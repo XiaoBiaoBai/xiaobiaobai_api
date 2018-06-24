@@ -96,5 +96,3 @@ class UserObjectApi(APIView):
             return Response(user.data, status=status.HTTP_201_CREATED)
         return Response(user.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # 95f9a48c0b434bce9fb84c8a6c13fEWE
-    # BtXbb1~!@#

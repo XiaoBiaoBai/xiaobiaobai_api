@@ -27,7 +27,10 @@ class Command(BaseCommand):
         message = options['message']
         self.stdout.write('开始发送交易')
         try:
-            txhash, txid = send_bitcash_message(message)
-            self.stdout.write('交易提交成功，txid:' + txid)
+            result = send_bitcash_message(message)
+            if result:
+                txhash, txid = send_bitcash_message(message)
+                self.stdout.write('交易提交成功，txid:' + txid)
+                self.stdout.write('txhash:' + txhash)
         except Exception as e:
             self.stderr.write('交易失败，异常:' + str(e))

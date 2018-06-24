@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.utils.timezone import now
-from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.csrf import csrf_protect, csrf_exempt
 
 import requests
 import json
@@ -16,23 +16,25 @@ from weixin.weixinapi.wxutils import get_wx_config, WeixinLoginError
 
 from accounts.models import WxUserModel
 from weixin.manager import WxManager
+from weixin.manager import get_wx_pay_client
 
-from weixin.manager import pay_client
 
-wxconfig = get_wx_config()
-
-wxlogin = WeixinLogin(wxconfig)
+def get_wx_login_client():
+    wxconfig = get_wx_config()
+    wxlogin = WeixinLogin(wxconfig)
+    return wxlogin
 
 
 def wxuser_login(request):
+    wxlogin = get_wx_login_client()
     if request.GET.get('code', default=''):
         try:
             code = request.GET.get('code')
             token_response = wxlogin.access_token(code)
             logger.info(token_response)
-            openid, userid, target_userid = WxManager.wxlogin_with_createuser(token_response)
+            openid, userid = WxManager.wxlogin_with_createuser(token_response)
             return JsonResponse(
-                {'code': 200, "msg": 'ok', 'openid': openid, 'userid': userid, 'target_userid': target_userid})
+                {'code': 200, "msg": 'ok', 'openid': openid, 'userid': userid})
         except WeixinLoginError as e:
             logger.error(e)
             return JsonResponse({'openid': '', "msg": str(e), "code": 500},
@@ -47,7 +49,9 @@ def wxuser_login(request):
         return HttpResponseRedirect(uri)
 
 
+@csrf_exempt
 def wx_pay_callback(request):
+    pay_client = get_wx_pay_client()
     if request.method == "POST":
         body = pay_client.to_dict(request.body)
         if pay_client.check(body):
@@ -56,13 +60,17 @@ def wx_pay_callback(request):
                 result = WxManager.wx_pay_callback(body)
                 if result:
                     resultxml = pay_client.to_xml(dict(return_code="SUCCESS", return_msg="OK"));
-                    return Response(resultxml)
+                    logger.info(resultxml)
+                    return HttpResponse(resultxml)
             except OrderModel.DoesNotExist:
                 resultxml = pay_client.to_xml(dict(return_code="Failed", return_msg="订单不存在"));
-                return Response(resultxml, status=status.HTTP_404_NOT_FOUND)
+                return HttpResponse(resultxml, status=status.HTTP_404_NOT_FOUND)
+            except Exception as e:
+                logger.error(e)
+
         else:
             resultxml = pay_client.to_xml(dict(return_code="Failed", return_msg="签名错误"));
-            return Response(resultxml, status=status.HTTP_403_FORBIDDEN)
+            return HttpResponse(resultxml, status=status.HTTP_403_FORBIDDEN)
 
 
 def wx_sign(request):
@@ -71,4 +79,4 @@ def wx_sign(request):
         data = WxManager.create_wxconfig_sign(url)
         return JsonResponse(data)
     else:
-        return Response('非法调用', status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse({'msg': '非法调用', 'code': 400}, status=status.HTTP_400_BAD_REQUEST)

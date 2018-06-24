@@ -24,22 +24,26 @@ from weixin.weixinapi.wxutils import get_wx_config, WeixinLoginError
 from xiaobiaobai.utils import logger
 from accounts.models import WxUserModel
 from orders.models import OrderModel
+from xiaobiaobai.signals import post_love_word_signal
 import uuid
 from django.utils.timezone import now
 from django.core.exceptions import ObjectDoesNotExist
 
-wxconfig = get_wx_config()
 
-pay_client = WeixinPay(wxconfig)
+def get_wx_pay_client():
+    wxconfig = get_wx_config()
+
+    pay_client = WeixinPay(wxconfig)
+    return pay_client
 
 
 class WxManager():
     @staticmethod
     def wxlogin_with_createuser(token_response):
         '''
-        根据微信openid创建用户及被表白用户
+        根据微信openid创建或获取用户
         :param token_response:微信返回token
-        :return:(openid,usermodel.id,targetusermodel.id)
+        :return:(openid,usermodel.id)
         '''
         openid = token_response['openid']
         try:
@@ -58,18 +62,13 @@ class WxManager():
         except ObjectDoesNotExist:
             usermodel = UserModel()
 
-        targetusermodel = UserModel()
-        targetusermodel.save()
-        if not usermodel.wxusermodel:
-            usermodel.wxusermodel = wxuser
-            usermodel.save()
-
-        return (openid, usermodel.id, targetusermodel.id)
+        return (openid, usermodel.id)
 
     @staticmethod
     def create_wx_jsapi(openid: str, orderid: uuid.UUID, body: str, fee: int):
         data = {'out_trade_no': orderid.hex, 'body': body, 'total_fee': fee, 'trade_type': 'JSAPI',
                 'openid': openid};
+        pay_client = get_wx_pay_client()
         result = pay_client.jsapi(**data)
         logger.info(result)
         return result
@@ -78,6 +77,7 @@ class WxManager():
     def create_wx_order(openid: str, orderid: uuid.UUID, body: str, fee: int):
         data = {'out_trade_no': orderid.hex, 'body': body, 'total_fee': fee, 'trade_type': 'JSAPI',
                 'openid': openid};
+        pay_client = get_wx_pay_client()
         result = pay_client.unified_order(**data)
         logger.info(result)
         return result
@@ -91,12 +91,21 @@ class WxManager():
             order.order_status = 'p'
             order.pay_time = now()
             order.save()
-            from orders.manager import OrderManager
-            OrderManager.post_love_words(order.order_content)
+            post_love_word_signal.send(sender=WxManager.__class__, orderid=order.id)
+            # from orders.manager import OrderManager
+            # result = OrderManager.post_love_words(order.order_content)
+            # if result:
+            #     txhash, txid = result
+            #     order.txid = txid
+            #     order.tx_hex = txhash
+            #     order.save()
+            #     return True
             return True
         except OrderModel.DoesNotExist:
+            logger.error('微信支付回调，订单未找到.out_trade_no:{out_trade_no}'.format(out_trade_no=out_trade_no))
             raise
 
     @staticmethod
     def create_wxconfig_sign(url):
+        pay_client = get_wx_pay_client()
         return pay_client.create_wxconfig_sign(url)

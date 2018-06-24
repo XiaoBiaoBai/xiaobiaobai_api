@@ -21,8 +21,10 @@ class OrderModel(models.Model):
     pay_time = models.DateTimeField("付款时间", null=True)
     usermodel = models.ForeignKey('accounts.UserModel', verbose_name='用户', related_name='postusermodel',
                                   on_delete=models.CASCADE, null=True)
-    target_usermodel = models.ForeignKey('accounts.UserModel', verbose_name='目标用户', related_name='targetusermodel',
-                                         on_delete=models.CASCADE, null=True)
+    username = models.CharField("发布对象用户名", null=True, max_length=300)
+    target_username = models.CharField("发布对象用户名", null=True, max_length=300)
+    show_confession_wall = models.BooleanField('是否在表白墙显示', null=False, default=True)
+
     tx_hex = models.CharField("tx_hex", max_length=2000, null=True)
     txid = models.CharField("txid", max_length=1000, null=True)
     confirmations = models.IntegerField("确认次数", default=0, null=False)
@@ -42,6 +44,12 @@ class OrderModel(models.Model):
 
     def __repr__(self):
         return self.__str__()
+
+    @property
+    def block_chain_url(self):
+        if self.txid:
+            return 'https://explorer.bitcoin.com/bch/tx/' + self.txid
+        return ''
 
     class Meta:
         ordering = ['-created_time']

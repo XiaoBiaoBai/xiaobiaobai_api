@@ -23,13 +23,13 @@ from xiaobiaobai.utils import send_bitcash_message, logger
 class OrderManager():
     @staticmethod
     def calculate_order_fee(order: PostLoveSerializer):
-        return 10
+        return 1
 
     @staticmethod
     def post_love_words(content: str):
         try:
             txhash, txid = send_bitcash_message(content)
-            logger.info(txhash, txid)
+            logger.info("txhash:{txhash}.txid:{txid}".format(txhash=txhash, txid=txid))
             return (txhash, txid)
         except Exception as e:
             logger.error(e)
@@ -41,14 +41,15 @@ class OrderManager():
         ordermodel = OrderModel()
         ordermodel.order_content = data['order_content']
         ordermodel.usermodel = UserModel.objects.get(pk=data['usermodel'])
-        ordermodel.target_usermodel = UserModel.objects.get(pk=data['target_usermodel'])
+        ordermodel.username = data['username']
+        ordermodel.target_username = data['target_username']
         ordermodel.city = data['city']
         ordermodel.fee = OrderManager.calculate_order_fee(order)
 
         ordermodel.save()
         openid = ordermodel.usermodel.wxusermodel.openid
 
-        jsdata = WxManager.create_wx_jsapi(openid=openid, orderid=ordermodel.id, body="发布表白",
+        jsdata = WxManager.create_wx_jsapi(openid=openid, orderid=ordermodel.id, body="区块链表白",
                                            fee=ordermodel.fee)
 
         return (ordermodel, jsdata)

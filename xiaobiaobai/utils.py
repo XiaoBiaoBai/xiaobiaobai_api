@@ -18,6 +18,7 @@ import requests
 import json
 import uuid
 import qrcode
+from django.conf import settings
 
 from systemconfig.models import SystemConfigMode
 
@@ -28,6 +29,8 @@ def get_systemconfigs():
     o = SystemConfigMode.objects.first()
     if not o:
         raise ValueError("系统配置不能为空")
+    if settings.DEBUG:
+        logger.info(repr(o))
     return o
 
 
