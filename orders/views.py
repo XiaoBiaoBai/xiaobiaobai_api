@@ -16,7 +16,7 @@ from orders.viewmodels import PostLoveSerializer, OrderSerializer, BlessingSeria
 from orders.manager import OrderManager
 from orders.models import OrderModel
 from accounts.views import check_is_uuid
-from xiaobiaobai.utils import logger
+from xiaobiaobai.utils import logger, convert_to_uuid
 
 
 class OrderList(APIView):
@@ -24,7 +24,7 @@ class OrderList(APIView):
         size = request.GET.get('size', default=20)
         index = request.GET.get('index', default=1)
         ordertype = request.GET.get('ordertype', default=1)
-
+        userid = request.GET.get('userid')
         if ordertype == 1:
             queryset = OrderModel.objects.order_by('created_time').all()
         else:
@@ -33,6 +33,11 @@ class OrderList(APIView):
 
         paginator = Paginator(queryset, size)
         datas = paginator.get_page(index)
+        if userid and convert_to_uuid(userid):
+            for d in datas:
+                
+                if not hasattr(d, 'queryuserid'):
+                    setattr(d, 'queryuserid', userid)
         serializer = OrderSerializer(datas, many=True)
         return Response(serializer.data)
 
