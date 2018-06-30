@@ -26,6 +26,8 @@ class SystemConfigMode(models.Model):
     created_time = models.DateTimeField('创建时间', default=now)
     last_mod_time = models.DateTimeField('修改时间', default=now)
 
+    default_index_url = models.URLField("默认首页地址", default='')
+
     def __str__(self):
         return self.leftoveraddress
 

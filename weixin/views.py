@@ -5,11 +5,12 @@ from django.views.decorators.csrf import csrf_protect, csrf_exempt
 
 import requests
 import json
+from urllib.parse import urlparse, urlunparse
 
 from rest_framework.response import Response
 from rest_framework import status
 
-from xiaobiaobai.utils import logger, ResponseCode
+from xiaobiaobai.utils import logger, ResponseCode, get_systemconfigs
 from orders.models import OrderModel
 from weixin.weixinapi.wxlogin import WeixinLogin
 from weixin.weixinapi.wxutils import get_wx_config, WeixinLoginError
@@ -23,6 +24,40 @@ def get_wx_login_client():
     wxconfig = get_wx_config()
     wxlogin = WeixinLogin(wxconfig)
     return wxlogin
+
+
+def wxuser_redirectlogin(request):
+    wxlogin = get_wx_login_client()
+    if request.GET.get('code', default=''):
+        try:
+            code = request.GET.get('code')
+            token_response = wxlogin.access_token(code)
+            logger.info(token_response)
+            openid, userid = WxManager.wxlogin_with_createuser(token_response)
+            config = get_systemconfigs()
+            url = request.GET.get('state', default=config.default_index_url)
+            p = urlparse(url)
+            if p.query:
+                url += '&userid=' + str(userid)
+            else:
+                url += '?userid=' + str(userid)
+            logger.info(url)
+            return HttpResponseRedirect(url)
+        except WeixinLoginError as e:
+
+            sysconfig = get_systemconfigs()
+            logger.error(e)
+            return HttpResponseRedirect(sysconfig.default_index_url)
+        except Exception as e:
+            logger.error(e)
+            sysconfig = get_systemconfigs()
+            logger.error(e)
+            return HttpResponseRedirect(sysconfig.default_index_url)
+    else:
+        redirecturl = request.GET.get('redirecturl')
+        uri = wxlogin.authorize(state=redirecturl)
+        logger.info(uri)
+        return HttpResponseRedirect(uri)
 
 
 def wxuser_login(request):

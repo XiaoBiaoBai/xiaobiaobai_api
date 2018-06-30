@@ -15,7 +15,7 @@
 from rest_framework import serializers
 from accounts.models import UserModel, WxUserModel
 from orders.models import OrderModel, BlessingModel
-from xiaobiaobai.utils import get_systemconfigs, logger, convert_to_uuid
+from xiaobiaobai.utils import get_systemconfigs, logger, convert_to_uuid, check_words_spam
 
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -43,9 +43,16 @@ class PostLoveSerializer(serializers.Serializer):
                                                    )
     username = serializers.CharField(required=True)
     target_username = serializers.CharField(required=True)
+    background_img = serializers.CharField(required=True)
     candies_count = serializers.IntegerField(required=True, min_value=0)
     order_content = serializers.CharField(required=True, max_length=200)
     city = serializers.CharField(required=True, max_length=100)
+
+    # def validate(self, attrs):
+    #     order_content = attrs['order_content']
+    #     if not check_words_spam(order_content):
+    #         raise serializers.ValidationError("order_content", "订单内容非法")
+    #     return super(PostLoveSerializer, self).validate(attrs)
 
 
 class OrderSerializer(serializers.Serializer):
@@ -54,6 +61,7 @@ class OrderSerializer(serializers.Serializer):
 
     username = serializers.CharField()
     target_username = serializers.CharField(required=True)
+    background_img = serializers.CharField(required=True)
 
     candies_count = serializers.IntegerField(required=True, min_value=0)
     order_content = serializers.CharField(required=True, max_length=200)

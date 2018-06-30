@@ -107,3 +107,4 @@ migrations/
 !migrations/__init__.py
 werobot_session
 systemconfig.json
+image/

@@ -13,6 +13,8 @@
 @time: 2018/6/9 上午12:05
 """
 
+from xiaobiaobai.utils import logger
+
 
 class Map(dict):
     """
@@ -141,13 +143,14 @@ def get_wx_config():
     try:
         from xiaobiaobai.utils import get_systemconfigs
         sysconfig = get_systemconfigs()
-        config = WeiXinConfig(app_id=sysconfig.weixin_appid, app_secret=sysconfig.weixin_appsecret,
-                              scope=sysconfig.wx_scope, redirect_uri=sysconfig.wx_redirect_uri,
-                              mch_id=sysconfig.mch_id, mch_key=sysconfig.mch_key,
-                              notify_url=sysconfig.pay_notify_url, token=sysconfig.wx_token,
-                              remote_addr=sysconfig.wx_remote_addr)
-        return config
+        if sysconfig:
+            config = WeiXinConfig(app_id=sysconfig.weixin_appid, app_secret=sysconfig.weixin_appsecret,
+                                  scope=sysconfig.wx_scope, redirect_uri=sysconfig.wx_redirect_uri,
+                                  mch_id=sysconfig.mch_id, mch_key=sysconfig.mch_key,
+                                  notify_url=sysconfig.pay_notify_url, token=sysconfig.wx_token,
+                                  remote_addr=sysconfig.wx_remote_addr)
+            return config
+        return None
     except Exception as e:
-        from xiaobiaobai.utils import logger
         logger.error(e)
         return None

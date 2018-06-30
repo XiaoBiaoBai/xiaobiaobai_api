@@ -19,19 +19,12 @@ import json
 import uuid
 import qrcode
 from django.conf import settings
+from django.core.cache import cache
+from hashlib import md5
 
 from systemconfig.models import SystemConfigMode
 
 logger = logging.getLogger('xiaobiaobai')
-
-
-def get_systemconfigs():
-    o = SystemConfigMode.objects.first()
-    if not o:
-        raise ValueError("系统配置不能为空")
-    if settings.DEBUG:
-        logger.info(repr(o))
-    return o
 
 
 def send_bitcash_message(message):
@@ -65,19 +58,33 @@ def get_transaction_info(txid):
 
 def get_baidu_accesstoken():
     config = get_systemconfigs()
+    # logger.info(config.baidu_appid, config.baidu_appsecret)
     host = 'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id={clientid}&client_secret={secret}'.format(
         clientid=config.baidu_appid, secret=config.baidu_appsecret)
     response = requests.get(host)
-    return response.content
+    logger.info(response.text)
+    return response.text
 
 
 def check_words_spam(content):
-    accesstoken = get_baidu_accesstoken()
+    try:
+        accesstoken = get_baidu_accesstoken()
+        url = 'https://aip.baidubce.com/rest/2.0/antispam/v2/spam?access_token=' + accesstoken
+        d = {
+            'content': content
+        }
+        rsp = requests.post(url, d)
+        logger.info(rsp.text)
+        obj = json.loads(rsp.text)
+        return obj and obj['result'] and obj['result']['spam'] == 0
+    except Exception as e:
+        logger.error(e)
+        return True
 
 
 def convert_to_uuid(s: str):
     try:
-        u = uuid.UUID(s)
+        u = uuid.UUID(str(s))
         return u
     except Exception as e:
         return None
@@ -86,6 +93,45 @@ def convert_to_uuid(s: str):
 def create_qr_code(body: str):
     image = qrcode.make(body)
     return image
+
+
+def cache_decorator(expiration=3 * 60):
+    def wrapper(func):
+        def news(*args, **kwargs):
+            key = ''
+            try:
+                view = args[0]
+                key = view.get_cache_key()
+            except:
+                key = None
+                pass
+            if not key:
+                unique_str = repr((func, args, kwargs))
+
+                m = md5(unique_str.encode('utf-8'))
+                key = m.hexdigest()
+            value = cache.get(key)
+            if value:
+                logger.info('cache_decorator get cache:%s key:%s' % (func.__name__, key))
+                return value
+            else:
+                logger.info('cache_decorator set cache:%s key:%s' % (func.__name__, key))
+                value = func(*args, **kwargs)
+                cache.set(key, value, expiration)
+                return value
+
+        return news
+
+
+@cache_decorator
+def get_systemconfigs():
+    o = SystemConfigMode.objects.first()
+    if not o:
+        raise ValueError("系统配置不能为空")
+    if settings.DEBUG:
+        pass
+        # logger.info(repr(o))
+    return o
 
 
 class ResponseCode():

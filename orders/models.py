@@ -1,6 +1,9 @@
 import uuid
 from django.db import models
 from django.utils.timezone import now
+from django.utils.functional import cached_property
+from django.core.cache import cache
+from xiaobiaobai.utils import logger
 
 # Create your models here.
 THIRD_ORDER_CHANNEL = (
@@ -27,10 +30,11 @@ class OrderModel(models.Model):
 
     tx_hex = models.CharField("tx_hex", max_length=2000, null=True)
     txid = models.CharField("txid", max_length=1000, null=True)
-    confirmations = models.IntegerField("确认次数", default=0, null=False)
-    block_height = models.CharField("块高度", max_length=1000, null=True)
+    block_height = models.CharField("打包的时候块高度", max_length=1000, null=True)
     block_hash = models.CharField("块hash", max_length=2000, null=True)
     fee = models.IntegerField("费用", null=True)
+
+    background_img = models.CharField("背景图片地址", null=False, default='', max_length=1000)
 
     city = models.CharField('位置', max_length=100, null=True)
     candies_count = models.IntegerField('糖果数目', default=0, null=False)
@@ -59,6 +63,22 @@ class OrderModel(models.Model):
             count = self.blessingmodel_set.filter(usermodel=userid).count()
             return count <= 0
         return True
+
+    @property
+    def confirmations(self):
+        if self.txid:
+            try:
+                from xiaobiaobai.utils import get_transaction_info
+                info = get_transaction_info(self.txid)
+                if info and info['data']:
+                    data = info['data']
+                    confirmations = data['confirmations']
+                    logger.info(confirmations)
+                    return confirmations
+            except Exception as e:
+                logger.error(e)
+                return 0
+        return 0
 
     class Meta:
         ordering = ['-created_time']

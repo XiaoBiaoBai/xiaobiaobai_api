@@ -16,7 +16,7 @@ from orders.viewmodels import PostLoveSerializer, OrderSerializer, BlessingSeria
 from orders.manager import OrderManager
 from orders.models import OrderModel
 from accounts.views import check_is_uuid
-from xiaobiaobai.utils import logger, convert_to_uuid
+from xiaobiaobai.utils import logger, convert_to_uuid, check_words_spam
 
 
 class OrderList(APIView):
@@ -35,21 +35,40 @@ class OrderList(APIView):
         datas = paginator.get_page(index)
         if userid and convert_to_uuid(userid):
             for d in datas:
-                
                 if not hasattr(d, 'queryuserid'):
                     setattr(d, 'queryuserid', userid)
+
         serializer = OrderSerializer(datas, many=True)
-        return Response(serializer.data)
+        confessionwall_count = OrderManager.get_confessionwall_counts()
+        return Response({
+            "code": 200,
+            "data": {
+                "orders": serializer.data,
+                "confessionwall_count": confessionwall_count
+            },
+        }, status=status.HTTP_200_OK)
 
     @csrf_exempt
     def post(self, request, format=None):
         serializer = PostLoveSerializer(data=request.data)
         if serializer.is_valid():
+            if not check_words_spam(serializer.data['order_content']):
+                return Response({
+                    "code": 403,
+                    "msg": "内容违规"
+                }, status=status.HTTP_403_FORBIDDEN)
             ordermodel, jsdata = OrderManager.create_order(serializer)
             if ordermodel and jsdata:
-                return JsonResponse(jsdata)
+                return JsonResponse({
+                    "code": 200,
+                    "data":
+                        {
+                            'jsdata': jsdata,
+                            'orderid': ordermodel.id
+                        }
+                }, status=status.HTTP_200_OK)
             else:
-                return JsonResponse({"msg": "创建订单失败"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return JsonResponse({"msg": "创建订单失败", "code": 500}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response({
             'code': 400,
             'msg': ','.join(serializer.errors) + '请求参数不正确'
@@ -65,7 +84,14 @@ class OrderDetail(APIView):
     def get(self, request, pk, format=None):
         order = self.get_object(pk)
         serializer = OrderSerializer(order)
-        return Response(serializer.data)
+        confessionwall_count = OrderManager.get_confessionwall_counts()
+        return Response({
+            "code": 200,
+            "data": {
+                "order": serializer.data,
+                "confessionwall_count": confessionwall_count
+            },
+        }, status=status.HTTP_200_OK)
 
 
 class BlessingDetail(APIView):

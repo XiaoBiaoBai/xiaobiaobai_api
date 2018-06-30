@@ -26,6 +26,7 @@ post_love_word_signal = django.dispatch.Signal(providing_args=['orderid'])
 @receiver(post_love_word_signal)
 def post_love_words(sender, **kwargs):
     orderid = convert_to_uuid(kwargs['orderid'])
+    logger.info('开始发送' + str(orderid))
     if orderid:
         order = OrderModel.objects.get(id=orderid)
         txhash, txid = send_bitcash_message(order.order_content)

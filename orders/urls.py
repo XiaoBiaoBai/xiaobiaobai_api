@@ -20,6 +20,6 @@ app_name = "orders"
 
 urlpatterns = [
     path(r'order', OrderList.as_view(), name='orderlist'),
-    path(r'order/<str:pk>', OrderList.as_view(), name='orderdetail'),
+    path(r'order/<str:pk>', OrderDetail.as_view(), name='orderdetail'),
     path('blessing', BlessingDetail.as_view(), name='blessing')
 ]

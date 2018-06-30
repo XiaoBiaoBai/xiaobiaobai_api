@@ -44,6 +44,7 @@ class OrderManager():
         ordermodel.username = data['username']
         ordermodel.target_username = data['target_username']
         ordermodel.city = data['city']
+        ordermodel.background_img = data['background_img']
         ordermodel.fee = OrderManager.calculate_order_fee(order)
 
         ordermodel.save()
@@ -64,3 +65,7 @@ class OrderManager():
         b.usermodel = u
         b.ordermodel = o
         b.save()
+
+    @staticmethod
+    def get_confessionwall_counts():
+        return OrderModel.objects.filter(show_confession_wall=True).filter(order_status='p').count()

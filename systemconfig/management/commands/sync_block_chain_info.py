@@ -25,12 +25,15 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         self.stdout.write('开始同步...')
-        orders = OrderModel.objects.filter(order_status='p').filter(txid__isnull=False).all()
+        orders = OrderModel.objects.filter(order_status='p').filter(txid__isnull=False) \
+            .filter(block_height__isnull=True) \
+            .all()
+
         for o in orders:
             info = get_transaction_info(o.txid)
             if info and info['data']:
+                self.stdout.write("开始同步{orderid}.txid:{txid}".format(orderid=o.id, txid=o.txid))
                 data = info['data']
-                o.confirmations = data['confirmations']
                 o.block_height = data['block_height']
                 o.block_hash = data['block_hash']
                 o.save()

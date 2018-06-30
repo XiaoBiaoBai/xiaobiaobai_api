@@ -16,8 +16,6 @@ from accounts.models import UserModel
 from accounts.viewmodels import UserModelSerializer
 from xiaobiaobai.utils import logger
 
-from PIL import Image
-
 
 # Create your views here.
 
@@ -25,7 +23,7 @@ from PIL import Image
 @csrf_exempt
 def fileupload(request):
     if request.method == 'POST':
-        response = []
+        urls = []
         for filename in request.FILES:
             timestr = datetime.datetime.now().strftime('%Y/%m/%d')
 
@@ -33,22 +31,32 @@ def fileupload(request):
 
             if not os.path.exists(basepath):
                 os.makedirs(basepath)
-            savefilename = str(uuid.uuid4()) + os.path.splitext(filename)[1]
+            ext = os.path.splitext(filename)[1]
+            savefilename = str(uuid.uuid4()) + ext
 
             savepath = os.path.join(basepath, savefilename)
             with open(savepath, 'wb+') as wfile:
                 for chunk in request.FILES[filename].chunks():
                     wfile.write(chunk)
-
-            from PIL import Image
-            image = Image.open(savepath)
-            image.save(savepath, quality=20, optimize=True)
+            if ext in ['.jpg', '.png', 'jpeg']:
+                from PIL import Image
+                image = Image.open(savepath)
+                image.save(savepath, quality=20, optimize=True)
             url = 'https://resource.lylinux.net/{timestr}/{filename}'.format(timestr=timestr, filename=savefilename)
-            response.append(url)
-        return HttpResponse(response)
+            urls.append(url)
+
+        return JsonResponse({
+            'code': 200,
+            'msg': '',
+            'data': urls
+        })
 
     else:
-        return HttpResponse("only for post")
+        return JsonResponse({
+            'code': 404,
+            'msg': 'only for post',
+            'data': ''
+        }, status=status.HTTP_404_NOT_FOUND)
 
 
 def check_is_uuid():
@@ -95,4 +103,3 @@ class UserObjectApi(APIView):
             user.save()
             return Response(user.data, status=status.HTTP_201_CREATED)
         return Response(user.errors, status=status.HTTP_400_BAD_REQUEST)
-
