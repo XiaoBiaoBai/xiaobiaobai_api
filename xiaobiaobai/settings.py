@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
+import raven
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -24,7 +25,18 @@ SECRET_KEY = '0#ll8p!$g%2lm4a06lq=nlnxa*#4^@zb14%#zu+-^pi28^&kl('
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+SITE_ROOT = os.path.dirname(os.path.abspath(__file__))
+SITE_ROOT = os.path.abspath(os.path.join(SITE_ROOT, '../'))
+
 ALLOWED_HOSTS = ['*']
+
+SENTRY_REMOTE_URL = 'http://localhost:9000/sentry/store/'
+RAVEN_CONFIG = {
+    'dsn': 'https://ade6813f660e4401b4e8efa5c0fb2c9c:dfca305bc2de48abaa3839298e145307@sentry.lylinux.net//3',
+    # If you are using git, you can also automatically configure the
+    # release based on the git info.
+    'release': raven.fetch_git_sha(os.path.abspath(SITE_ROOT)),
+}
 
 # Application definition
 
@@ -36,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'raven.contrib.django.raven_compat',
     'corsheaders',
     'rest_framework',
     'accounts',
@@ -130,13 +143,14 @@ STATIC_URL = '/static/'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'root': {
+        'level': 'WARNING',
+        'handlers': ['sentry', 'console', 'log_file'],
+    },
     'formatters': {
         'verbose': {
-            'format': '[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s',
-        },
-        'simple': {
-            'format': '%(levelname)s %(asctime)s %(message)s'
-        },
+            'format': '[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d %(module)s] %(message)s',
+        }
     },
     'filters': {
         'require_debug_false': {
@@ -158,7 +172,7 @@ LOGGING = {
             'level': 'DEBUG',
             'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
-            'formatter': 'simple'
+            'formatter': 'verbose'
         },
         'null': {
             'class': 'logging.NullHandler',
@@ -167,24 +181,36 @@ LOGGING = {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
-        }
+        },
+        'sentry': {
+            'level': 'ERROR',  # To capture more than ERROR, change to WARNING, INFO, etc.
+            'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
+            'tags': {'custom-tag': 'x'},
+        },
     },
     'loggers': {
         'xiaobiaobai': {
-            'handlers': ['log_file', 'console'],
+            'handlers': ['log_file', 'console', 'sentry'],
             'level': 'INFO',
             'propagate': True,
         },
         'django.request': {
-            'handlers': ['mail_admins'],
+            'handlers': ['mail_admins', 'sentry'],
             'level': 'ERROR',
+            'propagate': False,
+        },
+        'raven': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+            'propagate': False,
+        },
+        'sentry.errors': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
             'propagate': False,
         },
     }
 }
-
-SITE_ROOT = os.path.dirname(os.path.abspath(__file__))
-SITE_ROOT = os.path.abspath(os.path.join(SITE_ROOT, '../'))
 
 # CORS_ORIGIN_WHITELIST = (
 #     'xbb.ngrok.lylinux.net',

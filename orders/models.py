@@ -3,7 +3,7 @@ from django.db import models
 from django.utils.timezone import now
 from django.utils.functional import cached_property
 from django.core.cache import cache
-from xiaobiaobai.utils import logger
+from xiaobiaobai.utils import logger, get_transaction_info
 
 # Create your models here.
 THIRD_ORDER_CHANNEL = (
@@ -68,7 +68,6 @@ class OrderModel(models.Model):
     def confirmations(self):
         if self.txid:
             try:
-                from xiaobiaobai.utils import get_transaction_info
                 info = get_transaction_info(self.txid)
                 if info and info['data']:
                     data = info['data']
@@ -79,6 +78,10 @@ class OrderModel(models.Model):
                 logger.error(e)
                 return 0
         return 0
+
+    @property
+    def blessing_count(self):
+        return self.blessingmodel_set.count()
 
     class Meta:
         ordering = ['-created_time']

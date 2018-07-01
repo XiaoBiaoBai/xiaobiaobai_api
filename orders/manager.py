@@ -20,6 +20,8 @@ from accounts.models import UserModel
 from xiaobiaobai.utils import send_bitcash_message, logger
 
 
+
+
 class OrderManager():
     @staticmethod
     def calculate_order_fee(order: PostLoveSerializer):
@@ -69,3 +71,12 @@ class OrderManager():
     @staticmethod
     def get_confessionwall_counts():
         return OrderModel.objects.filter(show_confession_wall=True).filter(order_status='p').count()
+
+    @staticmethod
+    def update_show_confession_wall(userid, orderid, status: bool):
+        order = OrderModel.objects.get(id=orderid)
+        user = UserModel.objects.get(id=userid)
+        if order.usermodel.id != user.id:
+            raise ValueError("用户非法")
+        order.show_confession_wall = status
+        order.save()

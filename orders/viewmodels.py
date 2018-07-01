@@ -67,9 +67,20 @@ class OrderSerializer(serializers.Serializer):
     order_content = serializers.CharField(required=True, max_length=200)
     city = serializers.CharField(required=True, max_length=100)
     wx_prepayid = serializers.CharField(required=True, max_length=100)
-    blessings = BlessingSerializer(read_only=True, many=True, source='blessingmodel_set')
+    # blessings = BlessingSerializer(read_only=True, many=True, source='blessingmodel_set')
     confirmations = serializers.IntegerField(required=False)
     block_height = serializers.IntegerField(required=False)
     txid = serializers.CharField(required=False)
     block_chain_url = serializers.CharField(required=False)
     can_send_blessing = serializers.BooleanField(required=False, default=True)
+    blessing_count = serializers.IntegerField(required=False, default=0)
+    show_confession_wall = serializers.BooleanField(default=True)
+
+
+class ConfessionWallSerializer(serializers.Serializer):
+    usermodel = serializers.PrimaryKeyRelatedField(queryset=UserModel.objects.all(),
+                                                   pk_field=serializers.UUIDField()
+                                                   )
+    ordermodel = serializers.PrimaryKeyRelatedField(queryset=OrderModel.objects.all(),
+                                                    pk_field=serializers.UUIDField())
+    status = serializers.BooleanField(required=True)

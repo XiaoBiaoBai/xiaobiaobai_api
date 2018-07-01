@@ -48,14 +48,6 @@ def send_bitcash_message(message):
             raise e
 
 
-def get_transaction_info(txid):
-    api = 'https://bch-chain.api.btc.com/v3/tx/' + txid
-    response = requests.get(api)
-    if response.status_code == 200:
-        result = json.loads(response.text, encoding='utf-8')
-        return result
-
-
 def get_baidu_accesstoken():
     config = get_systemconfigs()
     # logger.info(config.baidu_appid, config.baidu_appsecret)
@@ -123,15 +115,35 @@ def cache_decorator(expiration=3 * 60):
         return news
 
 
-@cache_decorator
 def get_systemconfigs():
-    o = SystemConfigMode.objects.first()
-    if not o:
-        raise ValueError("系统配置不能为空")
-    if settings.DEBUG:
-        pass
-        # logger.info(repr(o))
-    return o
+    o = cache.get("systemconfig")
+    if o:
+        return o
+    else:
+        o = SystemConfigMode.objects.first()
+        if not o:
+            raise ValueError("系统配置不能为空")
+        cache.set("systemconfig", o, 60 * 60 * 10)
+        if settings.DEBUG:
+            pass
+            # logger.info(repr(o))
+        return o
+
+
+def get_transaction_info(txid):
+    value = cache.get(txid)
+    if value:
+        return value
+    else:
+        logger.info("获取区块信息:" + txid)
+        api = 'https://bch-chain.api.btc.com/v3/tx/' + txid
+        response = requests.get(api)
+        if response.status_code == 200:
+            result = json.loads(response.text, encoding='utf-8')
+            cache.set(txid, result, 3 * 60)
+            return result
+        else:
+            logger.error(response.text)
 
 
 class ResponseCode():
