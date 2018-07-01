@@ -114,6 +114,8 @@ def cache_decorator(expiration=3 * 60):
 
         return news
 
+    return wrapper
+
 
 def get_systemconfigs():
     o = cache.get("systemconfig")
@@ -130,20 +132,16 @@ def get_systemconfigs():
         return o
 
 
+@cache_decorator()
 def get_transaction_info(txid):
-    value = cache.get(txid)
-    if value:
-        return value
+    api = 'https://bch-chain.api.btc.com/v3/tx/' + txid
+    response = requests.get(api)
+    if response.status_code == 200:
+        result = json.loads(response.text, encoding='utf-8')
+        cache.set(txid, result, 3 * 60)
+        return result
     else:
-        logger.info("获取区块信息:" + txid)
-        api = 'https://bch-chain.api.btc.com/v3/tx/' + txid
-        response = requests.get(api)
-        if response.status_code == 200:
-            result = json.loads(response.text, encoding='utf-8')
-            cache.set(txid, result, 3 * 60)
-            return result
-        else:
-            logger.error(response.text)
+        logger.error(response.text)
 
 
 class ResponseCode():

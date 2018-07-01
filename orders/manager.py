@@ -17,9 +17,7 @@ from orders.viewmodels import PostLoveSerializer, BlessingSerializer
 from weixin.manager import WxManager
 from orders.models import OrderModel, BlessingModel
 from accounts.models import UserModel
-from xiaobiaobai.utils import send_bitcash_message, logger
-
-
+from xiaobiaobai.utils import send_bitcash_message, logger, cache_decorator
 
 
 class OrderManager():
@@ -69,6 +67,7 @@ class OrderManager():
         b.save()
 
     @staticmethod
+    @cache_decorator(1 * 60)
     def get_confessionwall_counts():
         return OrderModel.objects.filter(show_confession_wall=True).filter(order_status='p').count()
 

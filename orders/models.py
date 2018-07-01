@@ -3,7 +3,7 @@ from django.db import models
 from django.utils.timezone import now
 from django.utils.functional import cached_property
 from django.core.cache import cache
-from xiaobiaobai.utils import logger, get_transaction_info
+from xiaobiaobai.utils import logger, get_transaction_info, cache_decorator
 
 # Create your models here.
 THIRD_ORDER_CHANNEL = (
@@ -80,6 +80,7 @@ class OrderModel(models.Model):
         return 0
 
     @property
+    @cache_decorator(1 * 60)
     def blessing_count(self):
         return self.blessingmodel_set.count()
 
