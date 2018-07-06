@@ -15,11 +15,14 @@
 from rest_framework import serializers
 from accounts.models import UserModel, WxUserModel
 from orders.models import OrderModel, BlessingModel
-from xiaobiaobai.utils import get_systemconfigs, logger, convert_to_uuid, check_words_spam
+from xiaobiaobai.utils import get_systemconfigs, convert_to_uuid, check_words_spam
 
 from django.core.exceptions import ObjectDoesNotExist
 
 from accounts.viewmodels import UserModelSerializer
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class BlessingSerializer(serializers.Serializer):

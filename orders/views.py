@@ -17,9 +17,12 @@ from orders.viewmodels import PostLoveSerializer, OrderSerializer, BlessingSeria
 from orders.manager import OrderManager
 from orders.models import OrderModel
 from accounts.views import check_is_uuid
-from xiaobiaobai.utils import logger, convert_to_uuid, check_words_spam
+from xiaobiaobai.utils import convert_to_uuid, check_words_spam
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class OrderList(APIView):

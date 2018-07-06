@@ -22,8 +22,9 @@ import requests
 
 from weixin.weixinapi.wxutils import WeixinPayError, WeixinError, Map, WXPayConstants, WeiXinConfig
 
-from xiaobiaobai.utils import logger
+import logging
 
+logger = logging.getLogger(__name__)
 
 class WeixinPay(object):
 

@@ -32,7 +32,7 @@ ALLOWED_HOSTS = ['*']
 
 SENTRY_REMOTE_URL = 'http://localhost:9000/sentry/store/'
 RAVEN_CONFIG = {
-    'dsn': 'https://ade6813f660e4401b4e8efa5c0fb2c9c:dfca305bc2de48abaa3839298e145307@sentry.lylinux.net//3',
+    'dsn': 'https://90db298670b14d51a88f030e53383181:46e493461deb4eacb8a81e2542807865@sentry.lylinux.net//3',
     # If you are using git, you can also automatically configure the
     # release based on the git info.
     'release': raven.fetch_git_sha(os.path.abspath(SITE_ROOT)),

@@ -3,7 +3,11 @@ from django.db import models
 from django.utils.timezone import now
 from django.utils.functional import cached_property
 from django.core.cache import cache
-from xiaobiaobai.utils import logger, get_transaction_info, cache_decorator
+from xiaobiaobai.utils import get_transaction_info, cache_decorator
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Create your models here.
 THIRD_ORDER_CHANNEL = (

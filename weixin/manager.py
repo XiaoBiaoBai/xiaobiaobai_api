@@ -21,13 +21,15 @@ from weixin.weixinapi.wxpay import WeixinPay
 from weixin.weixinapi.wxlogin import WeixinLogin
 from weixin.weixinapi.wxutils import get_wx_config, WeixinLoginError
 
-from xiaobiaobai.utils import logger
 from accounts.models import WxUserModel
 from orders.models import OrderModel
 from xiaobiaobai.signals import post_love_word_signal
 import uuid
 from django.utils.timezone import now
 from django.core.exceptions import ObjectDoesNotExist
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def get_wx_pay_client():

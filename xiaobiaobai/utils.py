@@ -24,7 +24,7 @@ from hashlib import md5
 
 from systemconfig.models import SystemConfigMode
 
-logger = logging.getLogger('xiaobiaobai')
+logger = logging.getLogger(__name__)
 
 
 def send_bitcash_message(message):

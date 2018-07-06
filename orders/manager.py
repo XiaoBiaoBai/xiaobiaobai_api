@@ -17,7 +17,10 @@ from orders.viewmodels import PostLoveSerializer, BlessingSerializer
 from weixin.manager import WxManager
 from orders.models import OrderModel, BlessingModel
 from accounts.models import UserModel
-from xiaobiaobai.utils import send_bitcash_message, logger, cache_decorator
+from xiaobiaobai.utils import send_bitcash_message, cache_decorator
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class OrderManager():

@@ -17,8 +17,11 @@ import django.dispatch
 from django.dispatch import receiver
 from django.conf import settings
 
-from xiaobiaobai.utils import convert_to_uuid, send_bitcash_message, logger
+from xiaobiaobai.utils import convert_to_uuid, send_bitcash_message
 from orders.models import OrderModel
+import logging
+
+logger = logging.getLogger(__name__)
 
 post_love_word_signal = django.dispatch.Signal(providing_args=['orderid'])
 
@@ -29,6 +32,9 @@ def post_love_words(sender, **kwargs):
     logger.info('开始发送' + str(orderid))
     if orderid:
         order = OrderModel.objects.get(id=orderid)
+        if order.txid and order.tx_hex:
+            logger.info('{orderid}已经成功广播'.format(orderid=orderid))
+            return
         txhash, txid = send_bitcash_message(order.order_content)
         logger.info('txhash:{txhash},txid:{txid}'.format(txhash=txhash, txid=txid))
         order.txid = txid

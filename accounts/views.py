@@ -14,7 +14,9 @@ from rest_framework import status
 
 from accounts.models import UserModel
 from accounts.viewmodels import UserModelSerializer
-from xiaobiaobai.utils import logger
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 # Create your views here.

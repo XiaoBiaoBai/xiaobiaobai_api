@@ -10,7 +10,7 @@ from urllib.parse import urlparse, urlunparse
 from rest_framework.response import Response
 from rest_framework import status
 
-from xiaobiaobai.utils import logger, ResponseCode, get_systemconfigs
+from xiaobiaobai.utils import ResponseCode, get_systemconfigs
 from orders.models import OrderModel
 from weixin.weixinapi.wxlogin import WeixinLogin
 from weixin.weixinapi.wxutils import get_wx_config, WeixinLoginError
@@ -18,6 +18,10 @@ from weixin.weixinapi.wxutils import get_wx_config, WeixinLoginError
 from accounts.models import WxUserModel
 from weixin.manager import WxManager
 from weixin.manager import get_wx_pay_client
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def get_wx_login_client():

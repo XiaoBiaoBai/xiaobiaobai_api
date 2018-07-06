@@ -13,7 +13,9 @@
 @time: 2018/6/9 上午12:05
 """
 
-from xiaobiaobai.utils import logger
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Map(dict):
