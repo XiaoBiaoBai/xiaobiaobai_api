@@ -108,3 +108,4 @@ migrations/
 werobot_session
 systemconfig.json
 image/
+collectedstatic/

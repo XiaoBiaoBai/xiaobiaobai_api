@@ -27,7 +27,6 @@ DEBUG = True
 
 SITE_ROOT = os.path.dirname(os.path.abspath(__file__))
 SITE_ROOT = os.path.abspath(os.path.join(SITE_ROOT, '../'))
-
 ALLOWED_HOSTS = ['*']
 
 SENTRY_REMOTE_URL = 'http://localhost:9000/sentry/store/'
@@ -139,6 +138,8 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(SITE_ROOT, 'collectedstatic')
+STATICFILES = os.path.join(BASE_DIR, 'static')
 
 LOGGING = {
     'version': 1,
