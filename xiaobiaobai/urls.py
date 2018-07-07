@@ -18,8 +18,10 @@ from django.urls import path
 from django.conf.urls import url, include
 from django.conf import settings
 from django.conf.urls.static import static
+from xiaobiaobai.views import default_view
 
 urlpatterns = [
+                  path('', default_view),
                   url(r'weixin/', include('weixin.urls', namespace='weixin')),
                   url(r'order/', include('orders.urls', namespace='order')),
                   url('accounts/', include('accounts.urls', namespace='accounts')),
