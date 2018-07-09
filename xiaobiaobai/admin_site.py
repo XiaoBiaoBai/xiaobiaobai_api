@@ -19,6 +19,11 @@ from django.contrib.admin.models import LogEntry
 from systemconfig.admin import SystemConfigAdmin
 from systemconfig.models import SystemConfigMode
 from xiaobiaobai.logentryadmin import LogEntryAdmin
+from orders.admin import OrderModelAdmin, BlessingModelAdmin
+from orders.models import OrderModel, BlessingModel
+
+from accounts.models import UserModel, WxUserModel
+from accounts.admin import WxUserModelAdmin, UserModelAdmin
 
 
 class XiaoBiaoBaiAdminSite(AdminSite):
@@ -35,5 +40,8 @@ class XiaoBiaoBaiAdminSite(AdminSite):
 admin_site = XiaoBiaoBaiAdminSite(name='admin')
 
 admin_site.register(SystemConfigMode, SystemConfigAdmin)
-
+admin_site.register(OrderModel, OrderModelAdmin)
+admin_site.register(BlessingModel, BlessingModelAdmin)
+admin_site.register(UserModel, UserModelAdmin)
+admin_site.register(WxUserModel, WxUserModelAdmin)
 admin_site.register(LogEntry, LogEntryAdmin)
