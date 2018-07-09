@@ -40,23 +40,40 @@ class OrderList(APIView):
                 blesscounts=Count('blessingmodel')).order_by('-blesscounts').all()
 
         paginator = Paginator(queryset, size)
-        datas = paginator.get_page(index)
-        if userid and convert_to_uuid(userid):
-            for d in datas:
-                if not hasattr(d, 'queryuserid'):
-                    setattr(d, 'queryuserid', userid)
+        try:
+            index = int(index)
+        except:
+            index = 1
 
-        serializer = OrderSerializer(datas, many=True)
         confessionwall_count = OrderManager.get_confessionwall_counts()
-        return Response({
-            "code": 200,
-            "data": {
-                "orders": serializer.data,
-                "totalcount": paginator.count,
-                "index": paginator.num_pages,
-                "confessionwall_count": confessionwall_count
-            },
-        }, status=status.HTTP_200_OK)
+        if index > paginator.num_pages:
+            return Response({
+                "code": 200,
+                "data": {
+                    "orders": list(),
+                    "totalcount": paginator.count,
+                    "index": paginator.num_pages,
+                    "confessionwall_count": confessionwall_count
+                },
+            }, status=status.HTTP_200_OK)
+        else:
+            datas = paginator.get_page(index)
+            if userid and convert_to_uuid(userid):
+                for d in datas:
+                    if not hasattr(d, 'queryuserid'):
+                        setattr(d, 'queryuserid', userid)
+
+            serializer = OrderSerializer(datas, many=True)
+
+            return Response({
+                "code": 200,
+                "data": {
+                    "orders": serializer.data,
+                    "totalcount": paginator.count,
+                    "index": paginator.num_pages,
+                    "confessionwall_count": confessionwall_count
+                },
+            }, status=status.HTTP_200_OK)
 
     @csrf_exempt
     def post(self, request, format=None):
@@ -87,12 +104,22 @@ class OrderList(APIView):
 
 class OrderDetail(APIView):
     def get_object(self, pk):
-        user = get_object_or_404(OrderModel, id=pk)
-        return user
+        try:
+            user = OrderModel.objects.get(id=pk)
+            return user
+        except ObjectDoesNotExist:
+            raise
 
     @check_is_uuid()
     def get(self, request, pk, userid, format=None):
-        order = self.get_object(pk)
+        order = None
+        try:
+            order = self.get_object(pk)
+        except ObjectDoesNotExist:
+            return Response({
+                "code": 404,
+                "msg": "订单不存在"
+            }, status=status.HTTP_404_NOT_FOUND)
 
         if userid and convert_to_uuid(userid):
             if not hasattr(order, 'queryuserid'):

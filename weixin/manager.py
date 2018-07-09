@@ -63,7 +63,8 @@ class WxManager():
             usermodel = UserModel.objects.get(wxusermodel__openid=openid)
         except ObjectDoesNotExist:
             usermodel = UserModel()
-
+            usermodel.wxusermodel = wxuser
+            usermodel.save()
         return (openid, usermodel.id)
 
     @staticmethod
