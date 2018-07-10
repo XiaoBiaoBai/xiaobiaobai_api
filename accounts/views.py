@@ -29,7 +29,7 @@ def fileupload(request):
         for filename in request.FILES:
             timestr = datetime.datetime.now().strftime('%Y/%m/%d')
 
-            basepath = r'{base}/image/{timestr}'.format(timestr=timestr, base=settings.SITE_ROOT)
+            basepath = r'{base}/image/{timestr}'.format(timestr=timestr, base='/var/www/resource/')
 
             if not os.path.exists(basepath):
                 os.makedirs(basepath)

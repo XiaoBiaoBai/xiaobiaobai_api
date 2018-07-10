@@ -46,7 +46,7 @@ class PostLoveSerializer(serializers.Serializer):
                                                    )
     username = serializers.CharField(required=True)
     target_username = serializers.CharField(required=True)
-    background_img = serializers.CharField(required=True)
+    background_img = serializers.CharField(required=False)
     candies_count = serializers.IntegerField(required=True, min_value=0)
     order_content = serializers.CharField(required=True, max_length=200)
     city = serializers.CharField(required=True, max_length=100)
@@ -64,7 +64,7 @@ class OrderSerializer(serializers.Serializer):
 
     username = serializers.CharField()
     target_username = serializers.CharField(required=True)
-    background_img = serializers.CharField(required=True)
+    background_img = serializers.CharField(required=False)
 
     candies_count = serializers.IntegerField(required=True, min_value=0)
     order_content = serializers.CharField(required=True, max_length=200)

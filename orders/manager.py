@@ -26,7 +26,9 @@ logger = logging.getLogger(__name__)
 class OrderManager():
     @staticmethod
     def calculate_order_fee(order: PostLoveSerializer):
-        return 1
+        from xiaobiaobai.utils import get_systemconfigs
+        sysconfig = get_systemconfigs()
+        return sysconfig.default_fee
 
     @staticmethod
     def post_love_words(content: str):
