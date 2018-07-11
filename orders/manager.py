@@ -49,7 +49,7 @@ class OrderManager():
         ordermodel.username = data['username']
         ordermodel.target_username = data['target_username']
         ordermodel.city = data['city']
-        ordermodel.background_img = data['background_img']
+        ordermodel.background_img = data['background_img'] if 'background_img' in data else ''
         ordermodel.fee = OrderManager.calculate_order_fee(order)
 
         ordermodel.save()
