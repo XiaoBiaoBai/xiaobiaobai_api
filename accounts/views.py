@@ -44,7 +44,7 @@ def fileupload(request):
                 from PIL import Image
                 image = Image.open(savepath)
                 image.save(savepath, quality=20, optimize=True)
-            url = 'https://resource.lylinux.net/{timestr}/{filename}'.format(timestr=timestr, filename=savefilename)
+            url = 'https://resource.lylinux.net/image/{timestr}/{filename}'.format(timestr=timestr, filename=savefilename)
             urls.append(url)
 
         return JsonResponse({

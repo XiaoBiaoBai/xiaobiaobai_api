@@ -12,7 +12,8 @@ class OrderModelAdmin(admin.ModelAdmin):
     list_per_page = 20
     search_fields = ('order_content',)
     list_display = (
-        'id', 'third_orderid', 'order_status', 'usermodel', 'username', 'target_username', 'txid', 'fee')
+        'id', 'third_orderid', 'order_status', 'usermodel', 'username', 'target_username', 'txid', 'fee',
+        'created_time')
     list_filter = ('order_status', 'city', 'fee')
     # list_editable = ('target_username', 'username')
 
@@ -23,7 +24,7 @@ class UserModelInLine(admin.StackedInline):
 
 class BlessingModelAdmin(admin.ModelAdmin):
     list_per_page = 20
-    list_display = ('id', 'link_to_usermodel', 'link_to_ordermodel')
+    list_display = ('id', 'link_to_usermodel', 'link_to_ordermodel', 'created_time')
 
     def link_to_usermodel(self, obj):
         info = (obj.usermodel._meta.app_label, obj.usermodel._meta.model_name)

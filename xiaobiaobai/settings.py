@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 
 import os
 import raven
+import sys
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -24,6 +25,7 @@ SECRET_KEY = '0#ll8p!$g%2lm4a06lq=nlnxa*#4^@zb14%#zu+-^pi28^&kl('
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
 
 SITE_ROOT = os.path.dirname(os.path.abspath(__file__))
 SITE_ROOT = os.path.abspath(os.path.join(SITE_ROOT, '../'))
@@ -92,18 +94,30 @@ WSGI_APPLICATION = 'xiaobiaobai.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
+
+# http缓存时间
+CACHE_CONTROL_MAX_AGE = 2592000
+# cache setting
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': 'memcached:11211',
+        'KEY_PREFIX': 'xiaobiaobai_test' if TESTING else 'xiaobiaobai',
+        'TIMEOUT': 60 * 60 * 10
+    }
+}
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'xiaobiaobai',
-        'USER': 'root',
-        'PASSWORD': 'root',
-        'HOST': '127.0.0.1',
+        'USER': os.environ.get('DJANGO_MYSQL_USER'),
+        'PASSWORD': os.environ.get('DJANGO_MYSQL_PASSWORD'),
+        'HOST': os.environ.get('DJANGO_MYSQL_HOST'),
         'PORT': 3306,
+        'OPTIONS': {'charset': 'utf8mb4'},
     }
 }
-
-# Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
