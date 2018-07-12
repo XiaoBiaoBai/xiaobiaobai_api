@@ -98,7 +98,7 @@ class OrderList(APIView):
                 return JsonResponse({"msg": "创建订单失败", "code": 500}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
             logger.error(serializer.errors)
-            logger.error(request)
+            logger.error(request.data)
             return Response({
                 'code': 400,
                 'msg': ','.join(serializer.errors) + '请求参数不正确'
@@ -168,6 +168,8 @@ def update_show_confession_wall(request):
                     "msg": "非当前用户订单",
                 }, status=status.HTTP_403_FORBIDDEN)
         else:
+            logger.error(serializer.errors)
+            logger.error(request.data)
             return JsonResponse({
                 'code': 400,
                 'msg': ','.join(serializer.errors) + '请求参数不正确'
@@ -183,8 +185,10 @@ class BlessingDetail(APIView):
                 'code': 200,
                 'msg': 'ok'
             }, status=status.HTTP_201_CREATED)
-        logger.info(serializer.errors)
-        return Response({
-            'code': 400,
-            'msg': ','.join(serializer.errors) + '请求参数不正确'
-        }, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            logger.error(serializer.errors)
+            logger.error(request.data)
+            return Response({
+                'code': 400,
+                'msg': ','.join(serializer.errors) + '请求参数不正确'
+            }, status=status.HTTP_400_BAD_REQUEST)
