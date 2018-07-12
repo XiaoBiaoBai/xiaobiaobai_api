@@ -64,7 +64,7 @@ class OrderSerializer(serializers.Serializer):
 
     username = serializers.CharField()
     target_username = serializers.CharField(required=True)
-    background_img = serializers.CharField(required=False, allow_blank=True) 
+    background_img = serializers.CharField(required=False, allow_blank=True)
 
     candies_count = serializers.IntegerField(required=True, min_value=0)
     order_content = serializers.CharField(required=True, max_length=200)

@@ -96,10 +96,13 @@ class OrderList(APIView):
                 }, status=status.HTTP_200_OK)
             else:
                 return JsonResponse({"msg": "创建订单失败", "code": 500}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response({
-            'code': 400,
-            'msg': ','.join(serializer.errors) + '请求参数不正确'
-        }, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            logger.error(serializer.errors)
+            logger.error(request)
+            return Response({
+                'code': 400,
+                'msg': ','.join(serializer.errors) + '请求参数不正确'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 
 class OrderDetail(APIView):
