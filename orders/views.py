@@ -26,6 +26,12 @@ logger = logging.getLogger(__name__)
 
 
 class OrderList(APIView):
+    def options(self, request, *args, **kwargs):
+        return Response({
+            'code': 403,
+            'msg': '非法调用'
+        }, status=status.HTTP_403_FORBIDDEN)
+
     def get(self, request, format=None):
         size = request.GET.get('size', default=20)
         index = request.GET.get('index', default=1)
@@ -113,6 +119,12 @@ class OrderDetail(APIView):
         except ObjectDoesNotExist:
             raise
 
+    def options(self, request, *args, **kwargs):
+        return Response({
+            'code': 403,
+            'msg': '非法调用'
+        }, status=status.HTTP_403_FORBIDDEN)
+
     @check_is_uuid()
     def get(self, request, pk, userid, format=None):
         order = None
@@ -177,6 +189,18 @@ def update_show_confession_wall(request):
 
 
 class BlessingDetail(APIView):
+    def get(self, request, format=None):
+        return Response({
+            'code': 403,
+            'msg': '非法调用'
+        }, status=status.HTTP_403_FORBIDDEN)
+
+    def options(self, request, *args, **kwargs):
+        return Response({
+            'code': 403,
+            'msg': '非法调用'
+        }, status=status.HTTP_403_FORBIDDEN)
+
     def post(self, request, format=None):
         serializer = BlessingSerializer(data=request.data)
         if serializer.is_valid():
