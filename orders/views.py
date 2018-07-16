@@ -206,7 +206,8 @@ class BlessingDetail(APIView):
         if serializer.is_valid():
             usermodel = serializer.data['usermodel']
             ordermodel = serializer.data['ordermodel']
-            if ordermodel.blessingmodel_set.filter(usermodel=usermodel.id):
+            order = OrderModel.objects.get(id=ordermodel)
+            if order.blessingmodel_set.filter(usermodel=usermodel):
                 return Response({
                     'code': 400,
                     'msg': "不能重复点赞"
