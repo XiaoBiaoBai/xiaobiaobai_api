@@ -146,16 +146,22 @@ def get_latest_block():
         return None
 
 
-@cache_decorator()
 def get_transaction_info(txid):
+    key = 'transaction/' + txid
+    if cache.get(key):
+        return cache.get(key)
+
     api = 'https://bch-chain.api.btc.com/v3/tx/' + txid
     response = requests.get(api)
+    logger.info(response.text)
     if response.status_code == 200:
         result = json.loads(response.text, encoding='utf-8')
-        cache.set(txid, result, 3 * 60)
+
+        cache.set(key, result, 30 * 60)
         return result
     else:
         logger.error(response.text)
+        cache.remove(key)
 
 
 class ResponseCode():

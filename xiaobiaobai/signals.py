@@ -18,7 +18,7 @@ from django.dispatch import receiver
 from django.conf import settings
 from time import sleep
 
-from xiaobiaobai.utils import convert_to_uuid, send_bitcash_message, get_transaction_info
+from xiaobiaobai.utils import convert_to_uuid, send_bitcash_message, get_transaction_info, get_latest_block
 from orders.models import OrderModel
 import logging
 
@@ -35,9 +35,9 @@ def fill_order_transction_info(sender, **kwargs):
     try:
         if orderid:
             order = OrderModel.objects.get(id=orderid)
-            if order.block_height:
-                return
+
             sleep(times)
+            logger.info('开始获取区块信息:orderid:{orderid}'.format(orderid=orderid))
             info = get_transaction_info(order.txid)
             if info and info['data']:
                 data = info['data']
@@ -64,6 +64,8 @@ def post_love_words(sender, **kwargs):
         logger.info('txhash:{txhash},txid:{txid}'.format(txhash=txhash, txid=txid))
         order.txid = txid
         order.tx_hex = txhash
+        block = get_latest_block()
+        order.block_height = block + 1
         order.save()
         fill_transction_info_signal.send(sender=post_love_words.__class__, orderid=orderid,
                                          times=0)

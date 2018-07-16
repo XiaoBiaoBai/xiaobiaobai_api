@@ -15,7 +15,8 @@
 
 from django.core.management.base import BaseCommand, CommandError
 from orders.models import OrderModel
-
+import datetime
+from datetime import timedelta
 from xiaobiaobai.utils import get_transaction_info
 
 
@@ -23,12 +24,11 @@ class Command(BaseCommand):
     help = '同步交易'
 
     def handle(self, *args, **options):
-
-        self.stdout.write('开始同步...')
+        time = datetime.datetime.now() - timedelta(hours=2)
         orders = OrderModel.objects.filter(order_status='p').filter(txid__isnull=False) \
-            .filter(block_height__isnull=True) \
+            .filter(pay_time__gt=time) \
             .all()
-
+        self.stdout.write('开始同步...订单数:{count}'.format(count=len(orders)))
         for o in orders:
             info = get_transaction_info(o.txid)
             if info and info['data']:
@@ -37,4 +37,6 @@ class Command(BaseCommand):
                 o.block_height = data['block_height']
                 o.block_hash = data['block_hash']
                 o.save()
+            else:
+                self.stdout.write("区块获取出错{orderid}.txid:{txid}".format(orderid=o.id, txid=o.txid))
         self.stdout.write('结束同步')
