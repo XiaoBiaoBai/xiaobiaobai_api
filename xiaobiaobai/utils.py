@@ -132,6 +132,20 @@ def get_systemconfigs():
         return o
 
 
+@cache_decorator(expiration=3 * 60)
+def get_latest_block():
+    api = 'https://bch-chain.api.btc.com/v3/block/latest'
+    rsp = requests.get(api)
+    logger.info(rsp.text)
+    if rsp.status_code == 200:
+        data = json.loads(rsp.text)
+        if data and data['data']:
+            return data['data']['height']
+    else:
+        logger.error(rsp.text)
+        return None
+
+
 @cache_decorator()
 def get_transaction_info(txid):
     api = 'https://bch-chain.api.btc.com/v3/tx/' + txid

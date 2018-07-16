@@ -3,7 +3,7 @@ from django.db import models
 from django.utils.timezone import now
 from django.utils.functional import cached_property
 from django.core.cache import cache
-from xiaobiaobai.utils import get_transaction_info, cache_decorator
+from xiaobiaobai.utils import get_transaction_info, cache_decorator, get_latest_block
 
 import logging
 
@@ -34,7 +34,7 @@ class OrderModel(models.Model):
 
     tx_hex = models.CharField("tx_hex", max_length=2000, null=True)
     txid = models.CharField("txid", max_length=1000, null=True)
-    block_height = models.CharField("打包的时候块高度", max_length=1000, null=True)
+    block_height = models.IntegerField("打包的时候块高度", null=True)
     block_hash = models.CharField("块hash", max_length=2000, null=True)
     fee = models.IntegerField("费用", null=True)
 
@@ -72,12 +72,10 @@ class OrderModel(models.Model):
     def confirmations(self):
         if self.txid:
             try:
-                info = get_transaction_info(self.txid)
-                if info and info['data']:
-                    data = info['data']
-                    confirmations = data['confirmations']
-                    logger.info(confirmations)
-                    return confirmations
+                latestblock = get_latest_block()
+                if latestblock and latestblock != 0:
+                    count = int(latestblock) - self.block_height + 1
+                    return count
             except Exception as e:
                 logger.error(e)
                 return 0
