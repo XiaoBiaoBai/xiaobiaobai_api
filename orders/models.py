@@ -70,7 +70,7 @@ class OrderModel(models.Model):
 
     @property
     def confirmations(self):
-        if self.txid:
+        if self.txid and self.block_height:
             try:
                 latestblock = get_latest_block()
                 if latestblock and latestblock != 0:
