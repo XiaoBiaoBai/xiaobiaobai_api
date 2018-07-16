@@ -37,9 +37,10 @@ class OrderList(APIView):
         index = request.GET.get('index', default=1)
         ordertype = request.GET.get('ordertype', default=1)
         userid = request.GET.get('userid')
-        if ordertype == 1:
-            queryset = OrderModel.objects.filter(show_confession_wall=True).filter(order_status='p').order_by(
-                'created_time').all()
+        if ordertype == "1":
+            queryset = OrderModel.objects.filter(show_confession_wall=True) \
+                .filter(order_status='p') \
+                .order_by('-created_time').all()
         else:
             from django.db.models import Count
             queryset = OrderModel.objects.filter(show_confession_wall=True).filter(order_status='p').annotate(
