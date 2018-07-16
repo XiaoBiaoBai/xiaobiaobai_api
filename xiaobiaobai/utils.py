@@ -161,7 +161,7 @@ def get_transaction_info(txid):
         return result
     else:
         logger.error(response.text)
-        cache.remove(key)
+        cache.delete(key)
 
 
 class ResponseCode():
