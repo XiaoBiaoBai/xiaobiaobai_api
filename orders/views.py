@@ -204,11 +204,20 @@ class BlessingDetail(APIView):
     def post(self, request, format=None):
         serializer = BlessingSerializer(data=request.data)
         if serializer.is_valid():
+            usermodel = serializer.data['usermodel']
+            ordermodel = serializer.data['ordermodel']
+            if ordermodel.blessingmodel_set.filter(usermodel=usermodel.id):
+                return Response({
+                    'code': 400,
+                    'msg': "不能重复点赞"
+                })
+
             OrderManager.create_blessing_order(serializer)
             return Response({
                 'code': 200,
                 'msg': 'ok'
             }, status=status.HTTP_201_CREATED)
+
         else:
             logger.error(serializer.errors)
             logger.error(request.data)

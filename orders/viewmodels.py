@@ -31,13 +31,6 @@ class BlessingSerializer(serializers.Serializer):
     ordermodel = serializers.PrimaryKeyRelatedField(queryset=OrderModel.objects.all(),
                                                     pk_field=serializers.UUIDField())
 
-    def validate(self, attrs):
-        usermodel = attrs['usermodel']
-        ordermodel = attrs['ordermodel']
-        if ordermodel.blessingmodel_set.filter(usermodel=usermodel.id):
-            raise serializers.ValidationError("不能重复点赞")
-
-        return super(BlessingSerializer, self).validate(attrs)
 
 
 class PostLoveSerializer(serializers.Serializer):
