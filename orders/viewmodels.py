@@ -32,7 +32,6 @@ class BlessingSerializer(serializers.Serializer):
                                                     pk_field=serializers.UUIDField())
 
 
-
 class PostLoveSerializer(serializers.Serializer):
     usermodel = serializers.PrimaryKeyRelatedField(queryset=UserModel.objects.all(),
                                                    pk_field=serializers.UUIDField()
@@ -71,6 +70,7 @@ class OrderSerializer(serializers.Serializer):
     can_send_blessing = serializers.BooleanField(required=False, default=True)
     blessing_count = serializers.IntegerField(required=False, default=0)
     show_confession_wall = serializers.BooleanField(default=True)
+    created_time = serializers.DateTimeField(required=False)
 
 
 class ConfessionWallSerializer(serializers.Serializer):
