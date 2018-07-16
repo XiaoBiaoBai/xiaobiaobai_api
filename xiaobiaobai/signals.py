@@ -25,10 +25,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 post_love_word_signal = django.dispatch.Signal(providing_args=['orderid'])
-fill_transction_info = django.dispatch.Signal(providing_args=['orderid', 'times'])
+fill_transction_info_signal = django.dispatch.Signal(providing_args=['orderid', 'times'])
 
 
-@receiver(fill_transction_info)
+@receiver(fill_transction_info_signal)
 def fill_order_transction_info(sender, **kwargs):
     orderid = convert_to_uuid(kwargs['orderid'])
     times = int(kwargs['times'])
@@ -45,8 +45,8 @@ def fill_order_transction_info(sender, **kwargs):
                 order.block_height = block_height
                 order.save()
             else:
-                fill_order_transction_info.send(sender=fill_order_transction_info.__class__, orderid=orderid,
-                                                times=times + 1)
+                fill_transction_info_signal.send(sender=fill_order_transction_info.__class__, orderid=orderid,
+                                                 times=times + 1)
     except Exception as e:
         logger.error(e)
 
@@ -65,5 +65,5 @@ def post_love_words(sender, **kwargs):
         order.txid = txid
         order.tx_hex = txhash
         order.save()
-        fill_order_transction_info.send(sender=post_love_words.__class__, orderid=orderid,
-                                        times=0)
+        fill_transction_info_signal.send(sender=post_love_words.__class__, orderid=orderid,
+                                         times=0)
