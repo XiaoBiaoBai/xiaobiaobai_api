@@ -26,6 +26,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class WeixinPay(object):
 
     def __init__(self, config: WeiXinConfig):
@@ -210,11 +211,15 @@ class WeixinPay(object):
 
         return self._fetch(url, data)
 
-    def create_wxconfig_sign(self, url: str):
+    def create_wxconfig_sign(self, url: str, type='pay'):
         data = {'url': url}
         data['appId'] = self.wxconfig.app_id
         data['timestamp'] = str(int(time.time()))
-        data['nonceStr'] = self.nonce_str
+        if type == 'pay':
+            data['nonceStr'] = self.nonce_str
+        else:
+            data['noncestr'] = self.nonce_str
+
         sign = self.sign(data)
         data['signature'] = sign
         data['jsApiList'] = [

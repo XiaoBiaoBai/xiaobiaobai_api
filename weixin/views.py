@@ -115,7 +115,9 @@ def wx_pay_callback(request):
 def wx_sign(request):
     if request.method == 'GET':
         url = request.GET.get('url')
-        data = WxManager.create_wxconfig_sign(url)
+        type = request.GET.get('type', default='pay')
+        data = WxManager.create_wxconfig_sign(url, type)
+        data['type'] = type
         return JsonResponse(data)
     else:
         return JsonResponse({'msg': '非法调用', 'code': 400}, status=status.HTTP_400_BAD_REQUEST)
