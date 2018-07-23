@@ -231,20 +231,35 @@ class WeixinPay(object):
             obj = json.loads(rsp.content)
             return obj['ticket']
 
+    def jsapisign(self, raw):
+        raw = [(k, str(raw[k]) if isinstance(raw[k], int) else raw[k])
+               for k in sorted(raw.keys())]
+        s = "&".join("=".join(kv) for kv in raw if kv[1])
+        # s += "&key={0}".format(self.wxconfig.mch_key)
+        return hashlib.sha1(s.encode("utf-8")).hexdigest()
+
     def create_wxconfig_sign(self, url: str):
-        data = {'url': url}
-        data['appId'] = self.wxconfig.app_id
-        data['timestamp'] = str(int(time.time()))
-        data['jsapi_ticket'] = self.get_jsapi_ticket()
+
+        timestamp = str(int(time.time()))
         noncestr = self.nonce_str
+
+        jsapi_ticket = self.get_jsapi_ticket()
+        logger.info(jsapi_ticket)
+        data = {'url': url}
+        data['timestamp'] = timestamp
+        data['jsapi_ticket'] = jsapi_ticket
+
         data['noncestr'] = noncestr
 
-        sign = self.sign(data)
-        data['signature'] = sign
-        data.pop('noncestr')
-        data["nonceStr"] = noncestr
-
-        data['jsApiList'] = [
+        sign = self.jsapisign(data)
+        logger.info(sign)
+        jsapidata = {}
+        jsapidata.setdefault('debug', 'true')
+        jsapidata.setdefault('appId', self.wxconfig.app_id)
+        jsapidata.setdefault('timestamp', timestamp)
+        jsapidata.setdefault('nonceStr', noncestr)
+        jsapidata.setdefault('signature', sign)
+        jsapidata['jsApiList'] = [
             'checkJsApi',
             'onMenuShareTimeline',
             'onMenuShareAppMessage',
@@ -282,4 +297,4 @@ class WeixinPay(object):
             'chooseCard',
             'openCard'
         ]
-        return data
+        return jsapidata
