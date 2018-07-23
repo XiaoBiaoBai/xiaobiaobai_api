@@ -215,13 +215,13 @@ class WeixinPay(object):
         data = {'url': url}
         data['appId'] = self.wxconfig.app_id
         data['timestamp'] = str(int(time.time()))
-        if type == 'pay':
-            data['nonceStr'] = self.nonce_str
-        else:
-            data['noncestr'] = self.nonce_str
+        noncestr = self.nonce_str
+        data['noncestr'] = noncestr
 
         sign = self.sign(data)
         data['signature'] = sign
+        data.pop('noncestr')
+        data["nonceStr"] = noncestr
         data['jsApiList'] = [
             'checkJsApi',
             'onMenuShareTimeline',

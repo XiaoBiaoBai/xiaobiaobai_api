@@ -109,6 +109,6 @@ class WxManager():
             raise
 
     @staticmethod
-    def create_wxconfig_sign(url, type='pay'):
+    def create_wxconfig_sign(url):
         pay_client = get_wx_pay_client()
-        return pay_client.create_wxconfig_sign(url, type)
+        return pay_client.create_wxconfig_sign(url)

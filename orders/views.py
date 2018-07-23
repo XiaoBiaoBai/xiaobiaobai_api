@@ -37,14 +37,17 @@ class OrderList(APIView):
         index = request.GET.get('index', default=1)
         ordertype = request.GET.get('ordertype', default=1)
         userid = request.GET.get('userid')
+        queryself = request.GET.get('queryself')
         if ordertype == "1":
             queryset = OrderModel.objects.filter(show_confession_wall=True) \
                 .filter(order_status='p') \
-                .order_by('-created_time').all()
+                .order_by('-created_time')
         else:
             from django.db.models import Count
             queryset = OrderModel.objects.filter(show_confession_wall=True).filter(order_status='p').annotate(
-                blesscounts=Count('blessingmodel')).order_by('-blesscounts').all()
+                blesscounts=Count('blessingmodel')).order_by('-blesscounts')
+        if queryself == "1" and userid and convert_to_uuid(userid):
+            queryset = queryset.filter(usermodel__id=convert_to_uuid(userid))
 
         paginator = Paginator(queryset, size)
         try:
