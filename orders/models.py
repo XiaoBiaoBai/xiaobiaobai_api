@@ -59,14 +59,14 @@ class OrderModel(models.Model):
             return 'https://explorer.bitcoin.com/bch/tx/' + self.txid
         return ''
 
-    @property
-    def can_send_blessing(self):
-        if hasattr(self, 'queryuserid'):
-            from xiaobiaobai.utils import convert_to_uuid
-            userid = convert_to_uuid(getattr(self, 'queryuserid'))
-            count = self.blessingmodel_set.filter(usermodel=userid).count()
-            return count <= 0
-        return True
+    # @property
+    # def can_send_blessing(self):
+    #     if hasattr(self, 'queryuserid'):
+    #         from xiaobiaobai.utils import convert_to_uuid
+    #         userid = convert_to_uuid(getattr(self, 'queryuserid'))
+    #         count = self.blessingmodel_set.filter(usermodel=userid).count()
+    #         return count <= 0
+    #     return True
 
     @property
     def confirmations(self):

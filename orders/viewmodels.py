@@ -67,7 +67,6 @@ class OrderSerializer(serializers.Serializer):
     block_height = serializers.IntegerField(required=False)
     txid = serializers.CharField(required=False)
     block_chain_url = serializers.CharField(required=False)
-    can_send_blessing = serializers.BooleanField(required=False, default=True)
     blessing_count = serializers.IntegerField(required=False, default=0)
     show_confession_wall = serializers.BooleanField(default=True)
     created_time = serializers.DateTimeField(required=False)

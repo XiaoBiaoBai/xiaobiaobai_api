@@ -77,10 +77,7 @@ class OrderList(APIView):
             }, status=status.HTTP_200_OK)
         else:
             datas = paginator.get_page(index)
-            if userid and convert_to_uuid(userid):
-                for d in datas:
-                    if not hasattr(d, 'queryuserid'):
-                        setattr(d, 'queryuserid', userid)
+
 
             serializer = OrderSerializer(datas, many=True)
 
