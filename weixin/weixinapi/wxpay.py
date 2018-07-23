@@ -17,9 +17,9 @@ import hashlib
 import string
 from xml.etree import cElementTree as etree
 import time
-
+import json
 import requests
-
+from xiaobiaobai.utils import cache_decorator
 from weixin.weixinapi.wxutils import WeixinPayError, WeixinError, Map, WXPayConstants, WeiXinConfig
 
 import logging
@@ -211,10 +211,31 @@ class WeixinPay(object):
 
         return self._fetch(url, data)
 
-    def create_wxconfig_sign(self, url: str, type='pay'):
+    @cache_decorator(7100)
+    def get_access_token(self):
+        url = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={appid}&secret={secret}'.format(
+            appid=self.wxconfig.app_id, secret=self.wxconfig.app_secret)
+        rsp = requests.get(url)
+        if rsp.status_code == 200:
+            logger.info(rsp.content)
+            obj = json.loads(rsp.content)
+            return obj['access_token']
+
+    @cache_decorator(7100)
+    def get_jsapi_ticket(self):
+        token = self.get_access_token()
+        url = 'https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token={token}&type=jsapi'.format(token=token)
+        rsp = requests.get(url)
+        if rsp.status_code == 200:
+            logger.info(rsp.content)
+            obj = json.loads(rsp.content)
+            return obj['ticket']
+
+    def create_wxconfig_sign(self, url: str):
         data = {'url': url}
         data['appId'] = self.wxconfig.app_id
         data['timestamp'] = str(int(time.time()))
+        data['jsapi_ticket'] = self.get_jsapi_ticket()
         noncestr = self.nonce_str
         data['noncestr'] = noncestr
 
@@ -222,6 +243,7 @@ class WeixinPay(object):
         data['signature'] = sign
         data.pop('noncestr')
         data["nonceStr"] = noncestr
+
         data['jsApiList'] = [
             'checkJsApi',
             'onMenuShareTimeline',
