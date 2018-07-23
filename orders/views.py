@@ -78,7 +78,6 @@ class OrderList(APIView):
         else:
             datas = paginator.get_page(index)
 
-
             serializer = OrderSerializer(datas, many=True)
 
             return Response({
@@ -136,8 +135,7 @@ class OrderDetail(APIView):
         }, status=status.HTTP_403_FORBIDDEN)
 
     @check_is_uuid()
-    def get(self, request, pk, userid, format=None):
-        order = None
+    def get(self, request, pk, format=None):
         try:
             order = self.get_object(pk)
         except ObjectDoesNotExist:
@@ -145,10 +143,6 @@ class OrderDetail(APIView):
                 "code": 404,
                 "msg": "订单不存在"
             }, status=status.HTTP_404_NOT_FOUND)
-
-        if userid and convert_to_uuid(userid):
-            if not hasattr(order, 'queryuserid'):
-                setattr(order, 'queryuserid', userid)
         serializer = OrderSerializer(order)
         confessionwall_count = OrderManager.get_confessionwall_counts()
         return Response({
