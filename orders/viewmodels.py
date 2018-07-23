@@ -71,6 +71,7 @@ class OrderSerializer(serializers.Serializer):
     blessing_count = serializers.IntegerField(required=False, default=0)
     show_confession_wall = serializers.BooleanField(default=True)
     created_time = serializers.DateTimeField(required=False)
+    pay_time = serializers.DateTimeField(required=False)
 
 
 class ConfessionWallSerializer(serializers.Serializer):
