@@ -159,7 +159,7 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'root': {
-        'level': 'WARNING',
+        'level': 'INFO',
         'handlers': ['sentry', 'console', 'log_file'],
     },
     'formatters': {
@@ -177,7 +177,7 @@ LOGGING = {
     },
     'handlers': {
         'log_file': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': 'xiaobiaobai.log',
             'maxBytes': 16777216,  # 16 MB

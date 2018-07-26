@@ -21,6 +21,7 @@ import json
 import requests
 from xiaobiaobai.utils import cache_decorator
 from weixin.weixinapi.wxutils import WeixinPayError, WeixinError, Map, WXPayConstants, WeiXinConfig
+from django.core.cache import cache
 
 import logging
 
@@ -211,25 +212,44 @@ class WeixinPay(object):
 
         return self._fetch(url, data)
 
-    @cache_decorator(7100)
+    
     def get_access_token(self):
-        url = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={appid}&secret={secret}'.format(
-            appid=self.wxconfig.app_id, secret=self.wxconfig.app_secret)
-        rsp = requests.get(url)
-        if rsp.status_code == 200:
-            logger.info(rsp.content)
-            obj = json.loads(rsp.content)
-            return obj['access_token']
+        key='wx_access_token'
+        value=cache.get(key)
+        if value:
+            logger.info('get_access_token hits cache')
+            return value
+        else: 
+            url = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={appid}&secret={secret}'.format(
+                appid=self.wxconfig.app_id, secret=self.wxconfig.app_secret)
+            rsp = requests.get(url)
+            if rsp.status_code == 200:
+                logger.info(rsp.content)
+                obj = json.loads(rsp.content)
+                value= obj['access_token']
+                cache.set(key,value,7100)
+                return value
+            else:
+                logger.error(rsp.text)
 
-    @cache_decorator(7100)
     def get_jsapi_ticket(self):
-        token = self.get_access_token()
-        url = 'https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token={token}&type=jsapi'.format(token=token)
-        rsp = requests.get(url)
-        if rsp.status_code == 200:
-            logger.info(rsp.content)
-            obj = json.loads(rsp.content)
-            return obj['ticket']
+        key='jsapi_ticket'
+        value=cache.get(key)
+        if value:
+            logger.info('jsapi_ticket hits cache')
+            return value
+        else: 
+            token = self.get_access_token()
+            url = 'https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token={token}&type=jsapi'.format(token=token)
+            rsp = requests.get(url)
+            if rsp.status_code == 200:
+                logger.info(rsp.content)
+                obj = json.loads(rsp.content)
+                value =  obj['ticket']
+                cache.set(key,value,7100)
+                return value
+            else:
+                logger.error(rsp.text)
 
     def jsapisign(self, raw):
         raw = [(k, str(raw[k]) if isinstance(raw[k], int) else raw[k])
@@ -250,7 +270,12 @@ class WeixinPay(object):
         data['jsapi_ticket'] = jsapi_ticket
 
         data['noncestr'] = noncestr
+        logger.info(json.dumps({
+            'jsapi_ticket':jsapi_ticket,
+            'noncestr':noncestr,
+            'timestamp':timestamp
 
+        }))
         sign = self.jsapisign(data)
         logger.info(sign)
         jsapidata = {}
@@ -298,3 +323,4 @@ class WeixinPay(object):
             'openCard'
         ]
         return jsapidata
+
