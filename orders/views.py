@@ -40,7 +40,7 @@ class OrderList(APIView):
 
         if ordertype == "1":
             if userid:
-                queryset = OrderModel.objects.filter(show_confession_wall=True) \
+                queryset = OrderModel.objects \
                     .filter(usermodel__id=userid) \
                     .filter(order_status='p') \
                     .order_by('-created_time')

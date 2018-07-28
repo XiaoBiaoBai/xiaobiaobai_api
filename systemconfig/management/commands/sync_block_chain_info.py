@@ -17,6 +17,7 @@ from django.core.management.base import BaseCommand, CommandError
 from orders.models import OrderModel
 import datetime
 from datetime import timedelta
+from django.db.models import Q
 from xiaobiaobai.utils import get_transaction_info
 
 
@@ -24,8 +25,9 @@ class Command(BaseCommand):
     help = '同步交易'
 
     def handle(self, *args, **options):
-        time = datetime.datetime.now() - timedelta(hours=2)
+        time = datetime.datetime.now() - timedelta(hours=1)
         orders = OrderModel.objects.filter(order_status='p').filter(txid__isnull=False) \
+            .filter(Q(block_hash__isnull=True) | Q(block_height__isnull=True)) \
             .filter(pay_time__gt=time) \
             .all()
         self.stdout.write('开始同步...订单数:{count}'.format(count=len(orders)))

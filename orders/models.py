@@ -42,7 +42,7 @@ class OrderModel(models.Model):
 
     city = models.CharField('位置', max_length=100, null=True)
     candies_count = models.IntegerField('糖果数目', default=0, null=False)
-    wx_prepayid = models.CharField("微信prepayid", max_length=300, null=True)
+    # wx_prepayid = models.CharField("微信prepayid", max_length=300, null=True)
     order_content = models.CharField("文字", max_length=280, null=True)
     created_time = models.DateTimeField('创建时间', default=now)
     last_mod_time = models.DateTimeField('修改时间', default=now)
@@ -82,9 +82,15 @@ class OrderModel(models.Model):
         return 0
 
     @property
-    @cache_decorator(1 * 60)
     def blessing_count(self):
-        return self.blessingmodel_set.count()
+        key = 'blessing_count/' + self.id.hex
+        value = cache.get(key)
+        if value:
+            return value
+        else:
+            value = self.blessingmodel_set.count()
+            cache.set(key, value, 10)
+            return value
 
     class Meta:
         ordering = ['-created_time']
@@ -109,10 +115,15 @@ class BlessingModel(models.Model):
     last_mod_time = models.DateTimeField('修改时间', default=now)
 
     def __str__(self):
-        return self.id
+        return str(self.id)
 
     class Meta:
         ordering = ['-created_time']
         verbose_name = "用户祝福信息"
         verbose_name_plural = verbose_name
         get_latest_by = 'created_time'
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        key = 'blessing_count/' + self.id.hex
+        cache.remove(key)

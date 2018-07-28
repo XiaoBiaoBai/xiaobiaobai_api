@@ -8,13 +8,35 @@ from django.urls import reverse
 from django.utils.html import format_html
 
 
-class OrderModelAdmin(admin.ModelAdmin):
+class ReadOnlyModelAdmin(admin.ModelAdmin):
+    readonly_fields = []
+
+    def get_readonly_fields(self, request, obj=None):
+        return list(self.readonly_fields) + \
+               [field.name for field in obj._meta.fields] + \
+               [field.name for field in obj._meta.many_to_many]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+class OrderModelAdmin(ReadOnlyModelAdmin):
     list_per_page = 20
     search_fields = ('order_content',)
     list_display = (
         'id', 'third_orderid', 'order_status', 'usermodel', 'username', 'target_username', 'txid', 'fee',
         'created_time')
     list_filter = ('order_status', 'city', 'fee')
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if 'delete_selected' in actions:
+            del actions['delete_selected']
+        return actions
+
     # list_editable = ('target_username', 'username')
 
 
@@ -22,7 +44,7 @@ class UserModelInLine(admin.StackedInline):
     model = UserModel
 
 
-class BlessingModelAdmin(admin.ModelAdmin):
+class BlessingModelAdmin(ReadOnlyModelAdmin):
     list_per_page = 20
     list_display = ('id', 'link_to_usermodel', 'link_to_ordermodel', 'created_time')
 

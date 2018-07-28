@@ -18,6 +18,7 @@ from weixin.manager import WxManager
 from orders.models import OrderModel, BlessingModel
 from accounts.models import UserModel
 from xiaobiaobai.utils import send_bitcash_message, cache_decorator
+from django.core.cache import cache
 import logging
 
 logger = logging.getLogger(__name__)
@@ -72,9 +73,15 @@ class OrderManager():
         b.save()
 
     @staticmethod
-    @cache_decorator(1 * 60)
     def get_confessionwall_counts():
-        return OrderModel.objects.filter(show_confession_wall=True).filter(order_status='p').count()
+        key = 'confessionwall_counts'
+        value = cache.get(key)
+        if value:
+            return value
+        else:
+            value = OrderModel.objects.filter(show_confession_wall=True).filter(order_status='p').count()
+            cache.set(value, 10)
+            return value
 
     @staticmethod
     def update_show_confession_wall(userid, orderid, status: bool):

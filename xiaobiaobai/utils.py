@@ -147,20 +147,22 @@ def get_latest_block():
 
 
 def get_transaction_info(txid):
+    if not txid:
+        return
     key = 'transaction/' + txid
     if cache.get(key):
         return cache.get(key)
 
     api = 'https://bch-chain.api.btc.com/v3/tx/' + txid
     response = requests.get(api)
-    logger.info(response.text)
+    # logger.info(response.text)
     if response.status_code == 200:
         result = json.loads(response.text, encoding='utf-8')
-
         cache.set(key, result, 30 * 60)
         return result
     else:
-        logger.error(response.text)
+        logger.error('{txid}获取出错,response:{rsp}'.format(txid=txid, rsp=response.text))
+        # logger.error(response.text)
         cache.delete(key)
 
 
