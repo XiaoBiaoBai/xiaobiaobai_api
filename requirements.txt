@@ -9,7 +9,7 @@ cffi==1.11.5
 chardet==3.0.4
 coincurve==7.1.0
 coverage==4.5.1
-Django==2.0.5
+Django==2.2.10
 django-appconf==1.0.2
 django-autoslug==1.9.3
 django-compressor==2.2
