@@ -2,7 +2,7 @@ asn1crypto==0.24.0
 baidu-aip==2.2.5.2
 base58==0.2.5
 git+git://github.com/liangliangyy/bitcash@master
-bottle==0.12.13
+bottle==0.12.19
 cashaddress==1.0.4
 certifi==2018.4.16
 cffi==1.11.5
